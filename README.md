@@ -1,3 +1,11 @@
-# tpc-core
+# **tpc-core**
 
-Сервер игры Three-player Chess для обработки запросов пользователей.
+**Three-Player Chess (TPC)** server for processing user requests.
+
+## **Application Launch**
+
+The application can be laucnhed using the following command:
+
+```
+    python base/manage.py runserver
+```
