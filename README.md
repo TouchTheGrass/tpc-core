@@ -1,11 +1,11 @@
-# **tpc-core**
+# tpc-core
 
-**Three-Player Chess (TPC)** server for processing user requests.
+Сервер игры Three-Player Chess для обработки запросов пользователей.
 
-## **Application Launch**
+## :pushpin: Запуск приложения
 
-The application can be laucnhed using the following command:
+Приложение запускается с помощью следующей команды:
 
 ```
-    python base/manage.py runserver
+python base/manage.py runserver
 ```
