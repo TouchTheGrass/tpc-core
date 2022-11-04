@@ -7,5 +7,5 @@
 Приложение запускается с помощью следующей команды:
 
 ```
-python base/manage.py runserver
+python manage.py runserver
 ```
