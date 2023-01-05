@@ -209,12 +209,13 @@ class Board:
     * @param time - количество миллисекунд, затраченных на воспроизведение хода
     * @выдает исключение ImpossiblePositionException, если перемещение не является законным
     """
-    def move(self, start, fin):
-        if (self.is_legal_move(start, fin)):
+     def move(self, start, fin):
+        if (self.isLegalMove(start, fin)):
 
             mover = self.board[start]
             # если клетка пуста, такого значения в словаре нет -> будет ошибка KeyError
             taken = self.board[fin]
+            #self.board.pop(start)
             self.board[start]=None
             if (mover.get_type() == PieceType.PAWN and fin.get_row() == 0 and fin.get_colour() != mover.get_colour()):
                 self.board[fin]= Piece(PieceType.QUEEN, mover.get_colour())
@@ -230,12 +231,14 @@ class Board:
                     self.board.pop(rookPos)
 
             if (taken != None):
-                if (taken.get_type() == PieceType.KING): gameOver=True
+                # если фигуру съедают
+                if (taken != None):
+                    if (taken.get_type() == PieceType.KING):
+                        self.gameOver = True
+                    return taken
             return 0
-
         else:
-            print("Illegal Move: " + str(start.name) +"-" + str(fin.name))
-            return -1
+            raise ImpossiblePositionException("Illegal Move: " + str(start.name) +"-" + str(fin.name))
 
     """
     * Выполняет законный ход. 
@@ -247,8 +250,21 @@ class Board:
      * @param end конечная позиция перемещения
      * @выдает исключение ImpossiblePositionException, если перемещение не является законным
     """
+    """ возвращает список возможных ходов в формате координат для лицевой доски """
+    def display_legal_moves_for_engine(self, pos):
+        legal_moves=[]
+        for el in list(Position):
+            if self.is_legal_move(pos, el):
+                inv_coord = {v: k for k, v in self.coords.items()}
+                el = inv_coord.get(el)
+                legal_moves.append(el)
 
-    # возвращает список возможных ходов
+        if len(legal_moves)==0:
+            return None
+        else:
+            return legal_moves
+     
+    """ возвращает список возможных ходов """
     def display_legal_moves(self, pos):
         legal_moves=[]
         for el in list(Position):
