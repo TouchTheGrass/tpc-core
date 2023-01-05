@@ -57,7 +57,7 @@ class Board:
             'G9': Position.BB4, 'H9': Position.BA4
         }
         self.board={}
-
+        self.gameOver=False
         for i in range(len(positions)):
             c=PieceColor(positions.color)
             position=self.coords.get(positions.position)
