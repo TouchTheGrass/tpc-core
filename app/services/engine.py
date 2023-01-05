@@ -30,7 +30,7 @@ class EngineService:
         positions = PieceModel.objects.filter(game_session=session)
         # создаем доску для игры
         self.board = Board(positions)
-        possible_moves=self.board.display_legal_moves(piece_position)
+        possible_moves=self.board.display_legal_moves_for_engine(piece_position)
         return possible_moves
 
 
