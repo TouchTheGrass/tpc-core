@@ -17,9 +17,9 @@ class EngineService:
         # TODO
         raise NotImplementedError
 
-    def get_pieces(self) -> List[PieceEntity]:
-        # TODO
-        raise NotImplementedError
+    def get_pieces(self, session_id: int) -> List[PieceEntity]:
+        positions = PieceModel.objects.filter(game_session=session_id)
+        return positions
 
     def get_possible_moves(self, piece_id: int) -> List[str]:
         # получим позицию фигуры по id
@@ -42,12 +42,20 @@ class EngineService:
         # получим список положения фигур [[type, colour, position, game_session], ... ] для создания объекта доски
         positions=PieceModel.objects.filter(game_session=session)
         # создаем доску для игры
-        self.board=Board(positions)
+        board=Board(positions)
         # делаем ход на созданной доске
-        res=self.board.make_move(start_position, position)
+        res=board.make_move(start_position, position)
+        # съеденных фигур нет, если res=0
         if res==0:
-            # изменим значение position у фигуры, если операция прошла успешно
+            # изменим значение position у фигуры
             PieceModel.objects.get(id=piece_id).position=position
-        # ход невозможен
-        # вызываем исключение
+        # res - объект съеденной фигуры
+        else:
+            # изменим значение position у фигуры
+            PieceModel.objects.get(id=piece_id).position = position
+            # удалить из бд съеденную фигуру данной сессии, указанного цвета и типа
+            PieceModel.objects.filter(game_session=session, type=res.get_type().name, color=res.get_colour().name).delete()
+            # добавить возможность поменять статус игрока
+            # добавить возможность вносить изменения о положении фигур при рокировке
+        # если ход невозможен, вызываем исключение
 
