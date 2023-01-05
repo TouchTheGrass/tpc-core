@@ -1,6 +1,6 @@
-from PieceType import PieceType
+from app.models.enumerations.piece_type import PieceType
 from Direction import Direction
-from Colour import Colour
+from app.models.enumerations.piece_color import PieceColor
 from Position import Position
 from Piece import Piece
 import ImpossiblePositionException
@@ -14,13 +14,55 @@ import ImpossiblePositionException
 
 class Board:
 
-    """ positions - массив [[piece type, piece colour, position], ... ] """
+    """ positions - список [[piece type, piece colour, position], ... ] """
     def __init__(self, positions):
+        self.coords = {
+            # white
+            'A8': Position.WH1, 'B8': Position.WG1, 'C8': Position.WF1, 'D8': Position.WE1, 'I8': Position.WD1,
+            'J8': Position.WC1, \
+            'K8': Position.WB1, 'L8': Position.WA1, 'A7': Position.WH2, 'B7': Position.WG2, 'C7': Position.WF2,
+            'D7': Position.WE2, \
+            'I7': Position.WD2, 'J7': Position.WC2, 'K7': Position.WB2, 'L7': Position.WA2, \
+            'A6': Position.WH3, 'B6': Position.WG3, 'C6': Position.WF3, 'D6': Position.WE3, 'I6': Position.WD3,
+            'J6': Position.WC3, \
+            'K6': Position.WB3, 'L6': Position.WA3, \
+            'A5': Position.WH4, 'B5': Position.WG4, 'C5': Position.WF4, 'D5': Position.WE4, 'I5': Position.WD4,
+            'J5': Position.WC4, \
+            'K5': Position.WB4, 'L5': Position.WA4,
+            # red
+            'A1': Position.RA1, 'B1': Position.RB1, 'C1': Position.RC1, 'D1': Position.RD1, 'E1': Position.RE1,
+            'F1': Position.RF1, \
+            'G1': Position.RG1, 'H1': Position.RH1, \
+            'A2': Position.RA2, 'B2': Position.RB2, 'C2': Position.RC2, 'D2': Position.RD2, 'E2': Position.RE2,
+            'F2': Position.RF2, \
+            'G2': Position.RG2, 'H2': Position.RH2, \
+            'A3': Position.RA3, 'B3': Position.RB3, 'C3': Position.RC3, 'D3': Position.RD3, 'E3': Position.RE3,
+            'F3': Position.RF3, \
+            'G3': Position.RG3, 'H3': Position.RH3, \
+            'A4': Position.RA4, 'B4': Position.RB4, 'C4': Position.RC4, 'D4': Position.RD4, 'E4': Position.RE4,
+            'F4': Position.RF4, \
+            'G4': Position.RG4, 'H4': Position.RH4, \
+            # black
+            'L12': Position.BH1, 'K12': Position.BG1, 'J12': Position.BF1, 'I12': Position.BE1, 'E12': Position.BD1,
+            'F12': Position.BC1, \
+            'G12': Position.BB1, 'H12': Position.BA1, \
+            'L11': Position.BH2, 'K11': Position.BG2, 'J11': Position.BF2, 'I11': Position.BE2, 'E11': Position.BD2,
+            'F11': Position.BC2, \
+            'G11': Position.BB2, 'H11': Position.BA2, \
+            'L10': Position.BH3, 'K10': Position.BG3, 'J10': Position.BF3, 'I10': Position.BE3, 'E10': Position.BD3,
+            'F10': Position.BC3, \
+            'G10': Position.BB3, 'H10': Position.BA3, \
+            'L9': Position.BH4, 'K9': Position.BG4, 'J9': Position.BF4, 'I9': Position.BE4, 'E9': Position.BD4,
+            'F9': Position.BC4, \
+            'G9': Position.BB4, 'H9': Position.BA4
+        }
         self.board={}
 
         for i in range(len(positions)):
-            c=Colour(positions[i][1])
-            self.board[Position(positions[i][2])]= Piece(PieceType(positions[i][0]), c)
+            c=PieceColor(positions.color)
+            position=self.coords.get(positions.position)
+            # board[position]=piece_type
+            self.board[Position(position)]= Piece(PieceType(positions.type), c)
 
     """
     Выполняет один шаг хода, такой как L-образный ход коня или диагональный шаг слона.
@@ -189,9 +231,11 @@ class Board:
 
             if (taken != None):
                 if (taken.get_type() == PieceType.KING): gameOver=True
+            return 0
 
         else:
             print("Illegal Move: " + str(start.name) +"-" + str(fin.name))
+            return -1
 
     """
     * Выполняет законный ход. 
@@ -287,7 +331,7 @@ class Board:
     """
     def enemy_moves(self, for_colour):
         enemy_moves=[]
-        for c in list(Colour):  # проверка угрозы от всех вражеских цветов
+        for c in list(PieceColor):  # проверка угрозы от всех вражеских цветов
             if c != for_colour:
                 for i in self.all_legal_moves_of_pieces(c):
                     enemy_moves.append(i)
@@ -299,49 +343,10 @@ class Board:
 
     """ Функция переставления фигуры с помощью введения начальной и конечной координаты строкового формата 'A8' """
     def make_move(self, start, end):
-        coords = {
-            # white
-            'A8': Position.WH1, 'B8': Position.WG1, 'C8': Position.WF1, 'D8': Position.WE1, 'I8': Position.WD1,
-            'J8': Position.WC1, \
-            'K8': Position.WB1, 'L8': Position.WA1, 'A7': Position.WH2, 'B7': Position.WG2, 'C7': Position.WF2,
-            'D7': Position.WE2, \
-            'I7': Position.WD2, 'J7': Position.WC2, 'K7': Position.WB2, 'L7': Position.WA2, \
-            'A6': Position.WH3, 'B6': Position.WG3, 'C6': Position.WF3, 'D6': Position.WE3, 'I6': Position.WD3,
-            'J6': Position.WC3, \
-            'K6': Position.WB3, 'L6': Position.WA3, \
-            'A5': Position.WH4, 'B5': Position.WG4, 'C5': Position.WF4, 'D5': Position.WE4, 'I5': Position.WD4,
-            'J5': Position.WC4, \
-            'K5': Position.WB4, 'L5': Position.WA4,
-            # red
-            'A1': Position.RA1, 'B1': Position.RB1, 'C1': Position.RC1, 'D1': Position.RD1, 'E1': Position.RE1,
-            'F1': Position.RF1, \
-            'G1': Position.RG1, 'H1': Position.RH1, \
-            'A2': Position.RA2, 'B2': Position.RB2, 'C2': Position.RC2, 'D2': Position.RD2, 'E2': Position.RE2,
-            'F2': Position.RF2, \
-            'G2': Position.RG2, 'H2': Position.RH2, \
-            'A3': Position.RA3, 'B3': Position.RB3, 'C3': Position.RC3, 'D3': Position.RD3, 'E3': Position.RE3,
-            'F3': Position.RF3, \
-            'G3': Position.RG3, 'H3': Position.RH3, \
-            'A4': Position.RA4, 'B4': Position.RB4, 'C4': Position.RC4, 'D4': Position.RD4, 'E4': Position.RE4,
-            'F4': Position.RF4, \
-            'G4': Position.RG4, 'H4': Position.RH4, \
-            # black
-            'L12': Position.BH1, 'K12': Position.BG1, 'J12': Position.BF1, 'I12': Position.BE1, 'E12': Position.BD1,
-            'F12': Position.BC1, \
-            'G12': Position.BB1, 'H12': Position.BA1, \
-            'L11': Position.BH2, 'K11': Position.BG2, 'J11': Position.BF2, 'I11': Position.BE2, 'E11': Position.BD2,
-            'F11': Position.BC2, \
-            'G11': Position.BB2, 'H11': Position.BA2, \
-            'L10': Position.BH3, 'K10': Position.BG3, 'J10': Position.BF3, 'I10': Position.BE3, 'E10': Position.BD3,
-            'F10': Position.BC3, \
-            'G10': Position.BB3, 'H10': Position.BA3, \
-            'L9': Position.BH4, 'K9': Position.BG4, 'J9': Position.BF4, 'I9': Position.BE4, 'E9': Position.BD4,
-            'F9': Position.BC4, \
-            'G9': Position.BB4, 'H9': Position.BA4
-        }
-        start = coords.get(start)
-        end = coords.get(end)
-        self.move(start, end)
+        start = self.coords.get(start)
+        end = self.coords.get(end)
+        res=self.move(start, end)
+        return res
 
 
 
