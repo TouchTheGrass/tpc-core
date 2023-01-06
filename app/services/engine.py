@@ -54,11 +54,15 @@ class EngineService:
             # изменим значение position у фигуры
             PieceModel.objects.get(id=piece_id).position=position
         # res - список данных для изменения БД
+        # съедание фигуры
         elif len(res)==1:
             # изменим значение position у фигуры
             PieceModel.objects.get(id=piece_id).position = position
             # удалить из бд съеденную фигуру данной сессии, указанного цвета и типа
-            PieceModel.objects.filter(game_session=session, type=res.get_type().name, color=res.get_colour().name).delete()
+            PieceModel.objects.filter(game_session=session, type=res[0].get_type().name, color=res[0].get_colour().name).delete()
+            # если съеден король, поменять статус игры
+            if res[0].get_type()==PieceType.KING:
+                GameSessionModel.objects.filter(id=session).status = GameSessionStatus.COMPLETED
         # рокировка
         elif len(res)==2:
             # изменение position для короля
@@ -73,4 +77,5 @@ class EngineService:
         # поменять статус игрока данной сессии и текущего цвета на ожидание
         PlayerGameSessionModel.objects.get(session_id=session, color=PieceModel.objects.get(id=piece_id).color).status=PlayerStatus.WAIT
         # если ход невозможен, вызываем исключение
+
 
