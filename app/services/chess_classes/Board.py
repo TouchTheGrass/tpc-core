@@ -209,34 +209,43 @@ class Board:
     * @param time - количество миллисекунд, затраченных на воспроизведение хода
     * @выдает исключение ImpossiblePositionException, если перемещение не является законным
     """
-     def move(self, start, fin):
+    def move(self, start, fin):
         if (self.isLegalMove(start, fin)):
 
             mover = self.board[start]
             # если клетка пуста, такого значения в словаре нет -> будет ошибка KeyError
             taken = self.board[fin]
-            #self.board.pop(start)
             self.board[start]=None
             if (mover.get_type() == PieceType.PAWN and fin.get_row() == 0 and fin.get_colour() != mover.get_colour()):
                 self.board[fin]= Piece(PieceType.QUEEN, mover.get_colour())
+                # возвращает перемещаемую пешку, ее новый тип и цвет
+                return [mover, 'QUEEN', mover.get_colour().name]
             else: self.board[fin]= mover
+
+            # рокировка
             if (mover.get_type() == PieceType.KING and start.get_column() == 4 and start.get_row() == 0):
                 if (fin.get_column() == 2):
-                    rookPos = Position[mover.get_colour(), 0, 0]
+                    rookPos = Position.get(mover.get_colour(), 0, 0)
                     self.board[Position.get(mover.get_colour(), 0, 3)]= self.board[rookPos]
                     self.board.pop(rookPos)
+                    rook_pos = {'WHITE': 'I8', 'BLACK':'E12', 'RED':'D1'}
+                    # возвращает фигуру ладьи и позицию, куда она перемещается
+                    return [self.board[Position.get(mover.get_colour(), 0, 3)], rook_pos.get(mover.get_colour().name)]
                 elif (fin.get_column() == 6):
                     rookPos = Position.get(mover.get_colour(), 0, 7)
                     self.board[Position.get(mover.get_colour(), 0, 5)]= self.board[rookPos]
                     self.board.pop(rookPos)
+                    rook_pos={'WHITE':'C8', 'BLACK':'J12', 'RED':'F1'}
+                    # возвращает фигуру ладьи и позицию, куда она перемещается
+                    return [self.board[Position.get(mover.get_colour(), 0, 5)], rook_pos.get(mover.get_colour().name)]
 
             if (taken != None):
                 # если фигуру съедают
                 if (taken != None):
                     if (taken.get_type() == PieceType.KING):
                         self.gameOver = True
-                    return taken
-            return 0
+                    return [taken]
+            return []
         else:
             raise ImpossiblePositionException("Illegal Move: " + str(start.name) +"-" + str(fin.name))
 
