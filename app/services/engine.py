@@ -43,6 +43,8 @@ class EngineService:
         start_position=PieceModel.objects.get(id=piece_id).position
         # получим игровую сессию фигуры по id
         session=PieceModel.objects.get(id=piece_id).game_session
+        # получим id игрока
+        player=PlayerGameSessionModel.objects.get(session_id=session).player_id
         # получим список положения фигур [[type, colour, position, game_session], ... ] для создания объекта доски
         positions=PieceModel.objects.filter(game_session=session)
         # создаем доску для игры
@@ -54,8 +56,10 @@ class EngineService:
             # изменим значение position у фигуры
             PieceModel.objects.get(id=piece_id).position=position
         # res - список данных для изменения БД
-        # съедание фигуры
+        # съедение фигуры
         elif len(res)==1:
+            #добавим очки игроку
+            #Itogs.objects.get(id_session=session, id_player=player).points+=int(res[0].value)
             # изменим значение position у фигуры
             PieceModel.objects.get(id=piece_id).position = position
             # удалить из бд съеденную фигуру данной сессии, указанного цвета и типа
@@ -63,6 +67,7 @@ class EngineService:
             # если съеден король, поменять статус игры
             if res[0].get_type()==PieceType.KING:
                 GameSessionModel.objects.filter(id=session).status = GameSessionStatus.COMPLETED
+            # у проигравших снять очки
         # рокировка
         elif len(res)==2:
             # изменение position для короля
@@ -76,6 +81,17 @@ class EngineService:
             PieceModel.objects.get(id=piece_id).type=PieceType.QUEEN
         # поменять статус игрока данной сессии и текущего цвета на ожидание
         PlayerGameSessionModel.objects.get(session_id=session, color=PieceModel.objects.get(id=piece_id).color).status=PlayerStatus.WAIT
+        # поменять статус следующего игрока на совершение хода
+        PlayerGameSessionModel.objects.get(session_id=session, color=self.get_next_colour(PieceModel.objects.get(id=piece_id).color))\
+            .status=PlayerStatus.CURRENT
         # если ход невозможен, вызываем исключение
 
+    def get_next_colour(self, cur_col):
+        col_tuple=(PieceColor.WHITE, PieceColor.BLACK, PieceColor.RED)
+        ind=col_tuple.index(cur_col)
+        # если крайний элемент
+        if ind==2:
+            return col_tuple[0]
+        else:
+            return col_tuple[ind+1]
 
