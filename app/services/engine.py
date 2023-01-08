@@ -64,8 +64,7 @@ class EngineService:
         # съедение фигуры
         elif len(res)==1:
             #добавим очки игроку
-            #player_points=Itogs.objects.get(id_session=session, id_player=player)
-            #player_points.points+=int(res[0].value)
+            #self.adding_points(session, player, res[0])
             # изменим значение position у фигуры
             piece=PieceModel.objects.get(id=piece_id)
             piece.position = position
@@ -77,12 +76,7 @@ class EngineService:
                 game_status.status = GameSessionStatus.COMPLETED
                 """
                 # у остальных игроков (проигравших) снять 50 очков
-                
-                for i in range(2):
-                    piece_colour=self.get_next_colour(piece_colour)
-                    loser_id=PlayerGameSessionModel.objects.get(color=piece_colour, session_id=session)
-                    loser_points=Itogs.objects.get(id_session=session, id_player=loser_id)
-                    loser_points.points-=50
+                self.subtraction_points(session, piece_colour)
                 """
         # рокировка
         elif len(res)==2:
@@ -113,4 +107,29 @@ class EngineService:
             return col_tuple[0]
         else:
             return col_tuple[ind+1]
-
+    """
+    def adding_points(self, session_id, player_id, eaten_piece):
+        # добавим очки игроку
+        player_points=Itogs.objects.get(id_session=session_id, id_player=player_id)
+        if eaten_piece==PieceType.ROOK:
+            player_points.points+=10
+        elif eaten_piece==PieceType.BISHOP:
+            player_points.points+=10
+        elif eaten_piece==PieceType.KNIGHT:
+            player_points.points+=10
+        elif eaten_piece==PieceType.PAWN:
+            player_points.points+=1
+        elif eaten_piece==PieceType.QUEEN:
+            player_points.points+=25
+        elif eaten_piece == PieceType.KING:
+        player_points.points += 50
+    """
+    """
+    def subtraction_points(self, session_id, piece_colour):
+        # у остальных игроков (проигравших) снять 50 очков
+        for i in range(2):
+            piece_colour = self.get_next_colour(piece_colour)
+            loser_id = PlayerGameSessionModel.objects.get(color=piece_colour, session_id=session_id)
+            loser_points = Itogs.objects.get(id_session=session_id, id_player=loser_id)
+            loser_points.points -= 50
+    """
