@@ -1,0 +1,150 @@
+from typing import List
+from chess_classes.Piece import Piece
+from app.entities.game_session import GameSessionEntity
+from app.entities.piece import PieceEntity
+from app.models.enumerations.game_session_status import GameSessionStatus
+from app.services.chess_classes.Board import Board
+from app.models.piece import PieceModel
+from app.models.piece import GameSessionModel
+from app.models.player_game_session import PlayerGameSessionModel
+from app.models.enumerations.player_status import PlayerStatus
+from app.models.enumerations.piece_type import PieceType
+from app.models.enumerations.piece_color import PieceColor
+from app.models.player import PlayerModel
+
+class SessionService:
+
+    def create_game_session(self, first_player: PlayerModel, session_rule="base") -> GameSessionEntity:
+        # добавить запись о новой сессии в таблицу session
+        # добавить запись о новых фигурах на доске
+        # добавить запись об игроке в игровой сессии
+        if session_rule == "base":
+            # создаем игровую сессию
+            # rules ??
+            session = GameSessionModel.objects.create(status=GameSessionStatus.WAIT)
+            # game_session_enity=GameSessionEntity(status=GameSessionStatus.WAIT, rules= ???, id=session.id)
+            # создаем первого участника игровой сессии
+            PlayerGameSessionModel.object.create(player_id=first_player.id, session_id=session.id, is_active=True,
+                                                 status=PlayerStatus.CONNECTED, color=PieceColor.WHITE)
+
+            # создаем фигуры
+            # type, color, position, game_session
+            # белый цвет
+            PieceModel.objects.create(type=PieceType.QUEEN, color=PieceColor.WHITE, position='I8',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.KING, color=PieceColor.WHITE, position='D8',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.ROOK, color=PieceColor.WHITE, position='A8',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.ROOK, color=PieceColor.WHITE, position='L8',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.BISHOP, color=PieceColor.WHITE, position='J8',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.BISHOP, color=PieceColor.WHITE, position='C8',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.KNIGHT, color=PieceColor.WHITE, position='B8',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.KNIGHT, color=PieceColor.WHITE, position='K8',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.WHITE, position='A7',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.WHITE, position='B7',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.WHITE, position='C7',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.WHITE, position='D7',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.WHITE, position='I7',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.WHITE, position='J7',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.WHITE, position='K7',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.WHITE, position='L7',
+                                      game_session=session.id)
+
+            # черный цвет
+            PieceModel.objects.create(type=PieceType.QUEEN, color=PieceColor.BLACK, position='E12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.KING, color=PieceColor.BLACK, position='I12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.ROOK, color=PieceColor.BLACK, position='H12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.ROOK, color=PieceColor.BLACK, position='L12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.BISHOP, color=PieceColor.BLACK, position='F12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.BISHOP, color=PieceColor.BLACK, position='J12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.KNIGHT, color=PieceColor.BLACK, position='G12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.KNIGHT, color=PieceColor.BLACK, position='K12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.BLACK, position='L12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.BLACK, position='K12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.BLACK, position='J12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.BLACK, position='I12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.BLACK, position='E12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.BLACK, position='F12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.BLACK, position='G12',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.BLACK, position='H12',
+                                      game_session=session.id)
+
+            # красный цвет
+            PieceModel.objects.create(type=PieceType.QUEEN, color=PieceColor.RED, position='D1',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.KING, color=PieceColor.RED, position='E1', game_session=session.id)
+            PieceModel.objects.create(type=PieceType.ROOK, color=PieceColor.RED, position='A1', game_session=session.id)
+            PieceModel.objects.create(type=PieceType.ROOK, color=PieceColor.RED, position='H1', game_session=session.id)
+            PieceModel.objects.create(type=PieceType.BISHOP, color=PieceColor.RED, position='C1',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.BISHOP, color=PieceColor.RED, position='F1',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.KNIGHT, color=PieceColor.RED, position='B1',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.KNIGHT, color=PieceColor.RED, position='G1',
+                                      game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.RED, position='A2', game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.RED, position='B2', game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.RED, position='C2', game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.RED, position='D2', game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.RED, position='E2', game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.RED, position='F2', game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.RED, position='G2', game_session=session.id)
+            PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.RED, position='H2', game_session=session.id)
+
+            # return game_session_enity
+
+    """Подключение к игровой сессии"""
+    def connect_to_game_session(self, player: PlayerModel, session_rule="base"):
+
+        #при желании пользователя начать игру производится поиск сессии, где не хватает игроков
+        #в случае, если таковой нет, создается новая игровая сессия
+
+        # сессии с неполной группой игроков
+        waiting_sessions=GameSessionModel.objects.filter(status=GameSessionStatus.WAIT)
+        # если свободных сессий нет, создаем новую
+        if len(waiting_sessions)==0:
+            self.create_game_session(player, session_rule)
+        else:
+            # id свободной сессии
+            free_session_id=waiting_sessions[0].id
+            # количество человек в сессии
+            num_of_players=len(PlayerGameSessionModel.objects.filter(session_id=free_session_id))
+            if num_of_players==1:
+                PlayerGameSessionModel.objects.create(is_active=True, color=PieceColor.BLACK, status=PlayerStatus.CONNECTED)
+            elif num_of_players==2:
+                # команда полная -> меняем статус сессии на GAME
+                session=GameSessionModel.objects.get(id=free_session_id)
+                session.status=GameSessionStatus.GAME
+                PlayerGameSessionModel.objects.create(is_active=True, color=PieceColor.RED, status=PlayerStatus.CONNECTED)
+                # Даем разрешение сделать ход играющему за белые фигуры
+                first_player=PlayerGameSessionModel.objects.get(session_id=free_session_id, color=PieceColor.WHITE)
+                first_player.status=PlayerStatus.CURRENT
