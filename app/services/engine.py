@@ -85,12 +85,17 @@ class EngineService:
             king_piece.position = position
             # изменим position для ладьи
             rook_piece=PieceModel.objects.get(game_session=session, type=res[0].get_type().name, color=res[0].get_colour().name)
+            start_rook_pos=rook_piece.position
             rook_piece.position=res[1]
+            # записать ход ладьи в историю
+            #self.write_session_motion(rook_piece.id, start_rook_pos, rook_piece.position)
         # повышение пешки
         elif len(res)==3:
             # меняем тип фигуры на QUEEN
             pawn_piece=PieceModel.objects.get(id=piece_id)
             pawn_piece.type=PieceType.QUEEN
+        # Записать ход в историю
+        #self.write_session_motion(piece_id,start_position, position)
         # поменять статус игрока данной сессии из текущего цвета на ожидание
         cur_player=PlayerGameSessionModel.objects.get(session_id=session, color=PieceModel.objects.get(id=piece_id).color)
         cur_player.status=PlayerStatus.WAIT
@@ -99,6 +104,7 @@ class EngineService:
         next_player.status=PlayerStatus.CURRENT
         # если ход невозможен, вызываем исключение
 
+    
     def get_next_colour(self, cur_col):
         col_tuple=(PieceColor.WHITE, PieceColor.BLACK, PieceColor.RED)
         ind=col_tuple.index(cur_col)
@@ -107,6 +113,14 @@ class EngineService:
             return col_tuple[0]
         else:
             return col_tuple[ind+1]
+
+    """
+    # Запись хода в историю сессии
+    def write_session_motion(self, piece_id: int, start_position: str, end_position: str):
+        index=int(Piece_Movement.objects.all())+1
+        Piece_Movement.objects.create(piece_id=piece_id, index=index, start_position=start_position, end_position=end_position)
+    """
+        
     """
     def adding_points(self, session_id, player_id, eaten_piece):
         # добавим очки игроку
@@ -122,7 +136,8 @@ class EngineService:
         elif eaten_piece==PieceType.QUEEN:
             player_points.points+=25
         elif eaten_piece == PieceType.KING:
-        player_points.points += 50
+            player_points.points += 50
+            player_points.is_winner=True
     """
     """
     def subtraction_points(self, session_id, piece_colour):
