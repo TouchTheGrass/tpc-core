@@ -20,9 +20,11 @@ class SessionService:
         # добавить запись об игроке в игровой сессии
         if session_rule == "base":
             # создаем игровую сессию
-            # rules ??
-            session = GameSessionModel.objects.create(status=GameSessionStatus.WAIT)
-            # game_session_enity=GameSessionEntity(status=GameSessionStatus.WAIT, rules= ???, id=session.id)
+            session = GameSessionModel.objects.create(status=GameSessionStatus.WAIT, rules={"board_form":"quadrangular",\
+                                                                                            "victory_condition":"first_checkmate",
+                                                                                            "timer":False,})
+            game_session_enity=GameSessionEntity(status=GameSessionStatus.WAIT,\
+                                                 rules={"board_form":"quadrangular", "victory_condition":"first_checkmate", "timer":False}, id=session.id)
             # создаем первого участника игровой сессии
             PlayerGameSessionModel.object.create(player_id=first_player.id, session_id=session.id, is_active=True,
                                                  status=PlayerStatus.CONNECTED, color=PieceColor.WHITE)
@@ -120,7 +122,7 @@ class SessionService:
             PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.RED, position='G2', game_session=session.id)
             PieceModel.objects.create(type=PieceType.PAWN, color=PieceColor.RED, position='H2', game_session=session.id)
 
-            # return game_session_enity
+            return game_session_enity
 
     """Подключение к игровой сессии"""
     def connect_to_game_session(self, player: PlayerModel, session_rule="base"):
