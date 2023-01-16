@@ -56,13 +56,52 @@ class Board:
             'F9': Position.BC4, \
             'G9': Position.BB4, 'H9': Position.BA4
         }
-        self.board={}
+        # заполнить словарь координата:None
+        self.board={ # white
+            Position.WH1:None, Position.WG1:None, Position.WF1:None, Position.WE1:None, Position.WD1:None,
+            Position.WC1:None,
+            Position.WB1:None, Position.WA1:None, Position.WH2:None, Position.WG2:None, Position.WF2:None,
+            Position.WE2:None, \
+            Position.WD2:None, Position.WC2:None, Position.WB2:None, Position.WA2:None, \
+            Position.WH3:None, Position.WG3:None, Position.WF3:None, Position.WE3:None, Position.WD3:None,
+            Position.WC3:None, \
+            Position.WB3:None, Position.WA3:None, \
+            Position.WH4:None, Position.WG4:None, Position.WF4:None, Position.WE4:None, Position.WD4:None,
+            Position.WC4:None, \
+            Position.WB4:None, Position.WA4:None,
+            # red
+            Position.RA1:None, Position.RB1:None, Position.RC1:None, Position.RD1:None, Position.RE1:None,
+            Position.RF1:None, \
+            Position.RG1:None, Position.RH1:None, \
+            Position.RA2:None, Position.RB2:None, Position.RC2:None, Position.RD2:None, Position.RE2:None,
+            Position.RF2:None, \
+            Position.RG2:None, Position.RH2:None, \
+            Position.RA3:None, Position.RB3:None, Position.RC3:None, Position.RD3:None, Position.RE3:None,
+            Position.RF3:None, \
+            Position.RG3:None, Position.RH3:None, \
+            Position.RA4:None, Position.RB4:None, Position.RC4:None, Position.RD4:None, Position.RE4:None,
+            Position.RF4:None, \
+            Position.RG4:None, Position.RH4:None, \
+            # black
+            Position.BH1:None, Position.BG1:None, Position.BF1:None, Position.BE1:None, Position.BD1:None,
+            Position.BC1:None, \
+            Position.BB1:None, Position.BA1:None, \
+            Position.BH2:None, Position.BG2:None, Position.BF2:None, Position.BE2:None, Position.BD2:None,
+            Position.BC2:None, \
+            Position.BB2:None, Position.BA2:None, \
+            Position.BH3:None, Position.BG3:None, Position.BF3:None, Position.BE3:None, Position.BD3:None,
+            Position.BC3:None, \
+            Position.BB3:None, Position.BA3:None, \
+            Position.BH4:None, Position.BG4:None, Position.BF4:None, Position.BE4:None, Position.BD4:None,
+            Position.BC4:None, \
+            Position.BB4:None, Position.BA4:None}
+
         self.gameOver=False
         for i in range(len(positions)):
-            c=PieceColor(positions.color)
-            position=self.coords.get(positions.position)
+            c=PieceColor(positions[i][1])
+            position=self.coords.get(positions[i][2])
             # board[position]=piece_type
-            self.board[Position(position)]= Piece(PieceType(positions.type), c)
+            self.board[Position(position)]= Piece(PieceType(positions[i][0]), c)
 
     """
     Выполняет один шаг хода, такой как L-образный ход коня или диагональный шаг слона.
@@ -79,7 +118,7 @@ class Board:
     """
     def step(self, piece, step, current, reverse=False):
         for d in step:
-            if (piece.get_colour() != current.getColour() and piece.get_type() == PieceType.PAWN)\
+            if (piece.get_colour() != current.get_colour() and piece.get_type() == PieceType.PAWN)\
                     or reverse:
                   if d== Direction.FORWARD: d = Direction.BACKWARD
                   elif d==Direction.BACKWARD: d = Direction.FORWARD
@@ -87,7 +126,7 @@ class Board:
                   elif d==Direction.RIGHT: d = Direction.LEFT
             next = current.neighbour(d)
             # необходимость изменения направления при переключении между секциями доски
-            if(next.get_colour()!= current.getColour()):
+            if(next.get_colour()!= current.get_colour()):
                 reverse=True
             current = next
         return current
@@ -192,7 +231,7 @@ class Board:
                 try:
                     tmp = self.step(mover, step, start)
                     while (fin != tmp and self.board[tmp] == None):
-                        tmp = self.step(mover, step, tmp, tmp.getColour() != start.get_colour())
+                        tmp = self.step(mover, step, tmp, tmp.get_colour() != start.get_colour())
 
                     if (fin == tmp): return True
                 except: ImpossiblePositionException
@@ -210,7 +249,7 @@ class Board:
     * @выдает исключение ImpossiblePositionException, если перемещение не является законным
     """
     def move(self, start, fin):
-        if (self.isLegalMove(start, fin)):
+        if (self.is_legal_move(start, fin)):
 
             mover = self.board[start]
             # если клетка пуста, такого значения в словаре нет -> будет ошибка KeyError
@@ -219,7 +258,7 @@ class Board:
             if (mover.get_type() == PieceType.PAWN and fin.get_row() == 0 and fin.get_colour() != mover.get_colour()):
                 self.board[fin]= Piece(PieceType.QUEEN, mover.get_colour())
                 # возвращает перемещаемую пешку, ее новый тип и цвет
-                return [mover, 'QUEEN', mover.get_colour().name]
+                return [self.board[fin], PieceType.QUEEN, mover.get_colour().name]
             else: self.board[fin]= mover
 
             # рокировка
@@ -262,6 +301,7 @@ class Board:
     """ возвращает список возможных ходов в формате координат для лицевой доски """
     def display_legal_moves_for_engine(self, pos):
         legal_moves=[]
+        pos=self.coords.get(pos)
         for el in list(Position):
             if self.is_legal_move(pos, el):
                 inv_coord = {v: k for k, v in self.coords.items()}
@@ -314,11 +354,33 @@ class Board:
             if el[0]==target_pos:
                 # позиции угрожающих фигур
                 attack_piece.append(el[1])
-        # если позиция атакующей фигуры входит в список возможных ходов цвета
-        if attack_piece in my_moves:
-            return True
+        # если позиция атакующей фигуры входит в список возможных ходов цвета и ее не прикрывают
+
+        if self.el_in_list(attack_piece,my_moves)==1:
+            if self.try_to_make_move(target_pos, attack_piece[0])==True:
+                return True
+            else: return False
         else:
             return False
+
+    def el_in_list(self,part, all):
+        counter = 0
+        for el in part:
+            if el in all:
+                counter += 1
+        return counter
+
+
+    def try_to_make_move(self, start, end):
+        temp_board=self.board
+        res=self.move(start, end)
+        if self.check_check_and_checkmate(self.board[end].get_colour())==1:
+            self.board=temp_board
+            return False
+        self.board = temp_board
+        return True
+
+
 
     """ 
     Проверка шаха и мата 
@@ -333,7 +395,10 @@ class Board:
         # позиция короля
         position_of_king = self.get_position(PieceType.KING, for_colour)
         # возможные ходы вражеских фигур
-        enem_moves = self.enemy_moves(for_colour)
+        enem_moves_to_wherefrom = self.enemy_moves(for_colour)
+        enem_moves=[]
+        for el in enem_moves_to_wherefrom:
+            enem_moves.append(el[0])
         my_moves = self.all_legal_moves(for_colour)
         # проходимся по списку доступных ходов
         king_moves = self.display_legal_moves(position_of_king)
@@ -343,14 +408,21 @@ class Board:
         # return 0- ни шах, и не мат
         # return 1- шах
         # return 2- мат
+
         if position_of_king in enem_moves:
             # если королю некуда идти и нет возможности съесть угрожающую фигуру
-            if king_moves==None and self.ability_to_eat(position_of_king,enem_moves,my_moves)==False:
+            if self.ability_to_eat(position_of_king, enem_moves_to_wherefrom, my_moves)==False and self.opportunity_to_escape(king_moves,enem_moves)==False:
                 return 2
             return 1
         else:
             return 0
 
+    def opportunity_to_escape(self,  king_moves, enem_moves):
+        for el in king_moves:
+            if self.board[el]==None:
+                if el not in enem_moves:
+                        return True
+        return False
     """
     Возможные ходы противников для фигур цвета for_colour
     """
@@ -372,7 +444,6 @@ class Board:
         end = self.coords.get(end)
         res=self.move(start, end)
         return res
-
 
 
 
