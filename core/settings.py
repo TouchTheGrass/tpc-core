@@ -12,14 +12,21 @@ ALLOWED_HOSTS = []
 SITE_ID = 1
 
 INSTALLED_APPS = [
+    "app",
+
+    "channels",
+    "daphne",
+
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "app",
+
 ]
+
+ASGI_APPLICATION = "core.asgi.application"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
