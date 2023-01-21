@@ -1,9 +1,11 @@
-from app.models.enumerations.piece_type import PieceType
+#from app.models.enumerations.piece_type import PieceType
+#from app.models.enumerations.piece_color import PieceColor
+from PieceType import PieceType
+from Colour import PieceColor
 from Direction import Direction
-from app.models.enumerations.piece_color import PieceColor
 from Position import Position
 from Piece import Piece
-import ImpossiblePositionException
+from ImpossiblePositionException import ImpossiblePositionException
 """
 Основной класс для представления состояния игры.
  * Доска сопоставляет каждую позицию с фигурой в этой позиции,
@@ -190,20 +192,23 @@ class Board:
                         and self.board[Position.get(mCol, 2, start.get_column())] == None) \
                     or (target != None and i > 1))):
                             return True
-                except: ImpossiblePositionException
+                except:
+                    ImpossiblePositionException
 
         elif mover.get_type()==PieceType.KNIGHT:
             for i in range(len(steps)):
                 try:
                     if (fin == self.step(mover, steps[i], start)):
                         return True
-                except: ImpossiblePositionException
+                except:
+                    ImpossiblePositionException
 
         elif mover.get_type()==PieceType.KING:
             for i in range(len(steps)):
                 try:
                     if (fin == self.step(mover, steps[i], start)): return True
-                except: ImpossiblePositionException
+                except:
+                    ImpossiblePositionException
             try:
                 if (start == Position.get(mCol, 0, 4)):
                     if (fin == Position.get(mCol, 0, 6)):
@@ -224,7 +229,8 @@ class Board:
                                 and castle.get_colour() == mover.get_colour() \
                                 and empty1 == None and empty2 == None and empty3 == None):
                                     return True
-            except: ImpossiblePositionException
+            except:
+                ImpossiblePositionException
         else: # rook, bishop, queen, just need to check that one of their steps is iterated.
             for i in range(len(steps)):
                 step = steps[i]
@@ -234,7 +240,8 @@ class Board:
                         tmp = self.step(mover, step, tmp, tmp.get_colour() != start.get_colour())
 
                     if (fin == tmp): return True
-                except: ImpossiblePositionException
+                except:
+                    ImpossiblePositionException
 
         return False
 
@@ -444,8 +451,6 @@ class Board:
         end = self.coords.get(end)
         res=self.move(start, end)
         return res
-
-
 
 
 
