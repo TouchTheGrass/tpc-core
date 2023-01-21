@@ -1,6 +1,6 @@
+from PieceType import PieceType
+from Colour import PieceColor
 import unittest
-from app.models.enumerations.piece_type import PieceType
-from app.models.enumerations.piece_color import PieceColor
 from Board import Board
 from ImpossiblePositionException import ImpossiblePositionException
 
