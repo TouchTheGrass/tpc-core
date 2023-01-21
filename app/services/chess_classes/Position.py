@@ -1,7 +1,9 @@
+#from app.models.enumerations.piece_color import PieceColor
+from Colour import PieceColor
 from enum import Enum
 from ImpossiblePositionException import ImpossiblePositionException
 from Direction import Direction
-from app.models.enumerations.piece_color import PieceColor
+
 
 """
 Перечисление  96 позиций на доске
