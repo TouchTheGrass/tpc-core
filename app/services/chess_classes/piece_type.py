@@ -2,14 +2,13 @@ from enum import Enum
 
 from app.services.chess_classes.direction import Direction
 
-
 class PieceType(Enum):
-    PAWN = 1
-    KNIGHT = 2
-    BISHOP = 3
-    ROOK = 4
-    QUEEN = 5
-    KING = 6
+    PAWN=("pawn")
+    KNIGHT=("knight")
+    BISHOP=("bishop")
+    ROOK=("rook")
+    QUEEN=("queen")
+    KING=("king")
 
     def pawn_steps(self):
         """
