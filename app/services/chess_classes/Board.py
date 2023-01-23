@@ -105,11 +105,10 @@ class Board:
             Position.BC4: None,
             Position.BB4: None, Position.BA4: None}
 
-        self.game_over = False
+        
         for i in range(len(positions)):
             c = PieceColor(positions[i][1])
             position = self.coords.get(positions[i][2])
-            # board[position]=piece_type
             self.board[Position(position)] = Piece(PieceType(positions[i][0]), c)
 
     def step(self, piece, step, start, reverse=False):
@@ -315,8 +314,6 @@ class Board:
             if taken is not None:
                 # если фигуру съедают
                 if taken is not None:
-                    if taken.get_type() == PieceType.KING:
-                        self.game_over = True
                     return [taken]
             return []
         else:
@@ -456,11 +453,6 @@ class Board:
                     enemy_moves.append(i)
         return enemy_moves
 
-    def is_it_end_game(self):
-        """
-        Проверка закончена ли игра
-        """
-        return self.game_over
 
     def make_move(self, start, end):
         """
