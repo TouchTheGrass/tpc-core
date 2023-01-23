@@ -172,8 +172,8 @@ class Position(Enum):
             if self.row < 3:
                 return self.get(self.color, self.row + 1, self.column)
             if self.column < 4:
-                return self.get(list(PieceColor)[(int(self.color.value) + 1) % 3], 3, 7 - self.column)
-            return self.get(list(PieceColor)[(int(self.color.value) + 2) % 3], 3, 7 - self.column)
+                return self.get(list(PieceColor)[(int(self.color.value[0]) + 1) % 3], 3, 7 - self.column)
+            return self.get(list(PieceColor)[(int(self.color.value[0]) + 2) % 3], 3, 7 - self.column)
         elif direction.name == "BACKWARD":
             if self.row == 0:
                 raise ImpossiblePositionException("Moved off board")
