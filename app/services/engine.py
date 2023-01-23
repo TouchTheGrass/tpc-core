@@ -5,7 +5,7 @@ from app.models.piece import GameSessionModel
 from app.models.player_game_session import PlayerGameSessionModel
 from app.models.enumerations.player_status import PlayerStatus
 from app.models.enumerations.piece_type import PieceType
-from chess_classes.utilites import board_list_forming
+from utilites import board_list_forming
 
 class EngineService:
 
