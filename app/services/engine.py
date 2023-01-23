@@ -5,7 +5,7 @@ from app.models.piece import GameSessionModel
 from app.models.player_game_session import PlayerGameSessionModel
 from app.models.enumerations.player_status import PlayerStatus
 from app.models.enumerations.piece_type import PieceType
-from utilites import board_list_forming
+
 
 class EngineService:
 
@@ -124,4 +124,12 @@ class EngineService:
                     obj.scores+=1
                 elif eaten_piece_type==PieceType.QUEEN:
                     obj.scores+=25
+                    
+     
+    # метод для формирования из списка, содержащего объекты Piece в формат для движка [[PieceType, PieceColor, position],..]
+    def board_list_forming(list):
+        board_list=[]
+        for obj in list:
+            board_list.extend([[PieceType(obj.type.value),PieceColor(obj.color.value[1]),obj.position]])
+        return board_list
 
