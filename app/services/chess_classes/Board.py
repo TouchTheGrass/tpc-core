@@ -1,5 +1,5 @@
-from app.models.enumerations.piece_type import PieceType
-from app.models.enumerations.piece_color import PieceColor
+from app.models.enumerations.piece_type import PieceTypeEngine
+from app.models.enumerations.piece_color import PieceColorEngine
 from app.services.chess_classes.direction import Direction
 from app.services.chess_classes.impossible_position_exception import ImpossiblePositionException
 from app.services.chess_classes.piece import Piece
@@ -105,11 +105,11 @@ class Board:
             Position.BC4: None,
             Position.BB4: None, Position.BA4: None}
 
-        
+
         for i in range(len(positions)):
-            c = PieceColor(positions[i][1])
+            c = PieceColorEngine(positions[i][1])
             position = self.coords.get(positions[i][2])
-            self.board[Position(position)] = Piece(PieceType(positions[i][0]), c)
+            self.board[Position(position)] = Piece(PieceTypeEngine(positions[i][0]), c)
 
     def step(self, piece, step, start, reverse=False):
         """
@@ -133,7 +133,7 @@ class Board:
 
         current_step = start
         for d in step:
-            if (piece.get_color() != current_step.get_color() and piece.get_type() == PieceType.PAWN) or reverse:
+            if (piece.get_color() != current_step.get_color() and piece.get_type() == PieceTypeEngine.PAWN) or reverse:
                 if d == Direction.FORWARD:
                     d = Direction.BACKWARD
                 elif d == Direction.BACKWARD:
@@ -207,7 +207,7 @@ class Board:
             return False
         steps = mover.get_type().get_steps()
 
-        if mover.get_type() == PieceType.PAWN:
+        if mover.get_type() == PieceTypeEngine.PAWN:
             for i in range(len(steps)):
                 try:
                     if (fin == self.step(mover, steps[i], start)
@@ -219,7 +219,7 @@ class Board:
                 except Exception:
                     raise ImpossiblePositionException("Illegal move")
 
-        elif mover.get_type() == PieceType.KNIGHT:
+        elif mover.get_type() == PieceTypeEngine.KNIGHT:
             for i in range(len(steps)):
                 try:
                     if fin == self.step(mover, steps[i], start):
@@ -227,7 +227,7 @@ class Board:
                 except Exception:
                     raise ImpossiblePositionException("Illegal move")
 
-        elif mover.get_type() == PieceType.KING:
+        elif mover.get_type() == PieceTypeEngine.KING:
             for i in range(len(steps)):
                 try:
                     if fin == self.step(mover, steps[i], start):
@@ -240,7 +240,7 @@ class Board:
                         castle = self.board[Position.get(m_col, 0, 7)]
                         empty1 = self.board[Position.get(m_col, 0, 5)]
                         empty2 = self.board[Position.get(m_col, 0, 6)]
-                        if (castle is not None and castle.get_type() == PieceType.ROOK
+                        if (castle is not None and castle.get_type() == PieceTypeEngine.ROOK
                                 and castle.get_color() == mover.get_color()
                                 and empty1 is None and empty2 is None):
                             return True
@@ -250,7 +250,7 @@ class Board:
                         empty1 = self.board[Position.get(m_col, 0, 1)]
                         empty2 = self.board[Position.get(m_col, 0, 2)]
                         empty3 = self.board[Position.get(m_col, 0, 3)]
-                        if (castle is not None and castle.get_type() == PieceType.ROOK
+                        if (castle is not None and castle.get_type() == PieceTypeEngine.ROOK
                                 and castle.get_color() == mover.get_color()
                                 and empty1 is None and empty2 is None and empty3 is None):
                             return True
@@ -273,7 +273,7 @@ class Board:
 
     def move(self, start, fin):
         """
-        Выполняет законный ход. 
+        Выполняет законный ход.
         Если фигура взята, она заменяется в этой позиции взятой фигурой.
         Игра заканчивается, когда забирается король.
         Когда пешка достигает заднего ранга, она автоматически повышается до ферзя.
@@ -287,15 +287,15 @@ class Board:
             # если клетка пуста, такого значения в словаре нет -> будет ошибка KeyError
             taken = self.board[fin]
             self.board[start] = None
-            if mover.get_type() == PieceType.PAWN and fin.get_row() == 0 and fin.get_color() != mover.get_color():
-                self.board[fin] = Piece(PieceType.QUEEN, mover.get_color())
+            if mover.get_type() == PieceTypeEngine.PAWN and fin.get_row() == 0 and fin.get_color() != mover.get_color():
+                self.board[fin] = Piece(PieceTypeEngine.QUEEN, mover.get_color())
                 # возвращает перемещаемую пешку, ее новый тип и цвет
-                return [self.board[fin], PieceType.QUEEN, mover.get_color().name]
+                return [self.board[fin], PieceTypeEngine.QUEEN, mover.get_color().name]
             else:
                 self.board[fin] = mover
 
             # рокировка
-            if mover.get_type() == PieceType.KING and start.get_column() == 4 and start.get_row() == 0:
+            if mover.get_type() == PieceTypeEngine.KING and start.get_column() == 4 and start.get_row() == 0:
                 if fin.get_column() == 2:
                     rook_pos = Position.get(mover.get_color(), 0, 0)
                     self.board[Position.get(mover.get_color(), 0, 3)] = self.board[rook_pos]
@@ -417,7 +417,7 @@ class Board:
         :returns: 1: ни шах, и не мат; 2: шах; 3: мат
         """
         # позиция короля
-        position_of_king = self.get_position(PieceType.KING, for_color)
+        position_of_king = self.get_position(PieceTypeEngine.KING, for_color)
         # возможные ходы вражеских фигур
         enemy_moves_to_where_from = self.enemy_moves(for_color)
         enemy_moves = []
@@ -447,7 +447,7 @@ class Board:
         Возможные ходы противников для фигур цвета for_color
         """
         enemy_moves = []
-        for c in list(PieceColor):  # проверка угрозы от всех вражеских цветов
+        for c in list(PieceColorEngine):  # проверка угрозы от всех вражеских цветов
             if c != for_color:
                 for i in self.all_legal_moves_of_pieces(c):
                     enemy_moves.append(i)
@@ -462,3 +462,5 @@ class Board:
         end = self.coords.get(end)
         res = self.move(start, end)
         return res
+
+
