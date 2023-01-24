@@ -88,13 +88,13 @@ class PieceTypeEngine(Enum):
         Возвращает массив или массивы направлений, где каждый внутренний
         массив является допустимым шагом
         """
-        if self == PieceType.ROOK:
+        if self == PieceTypeEngine.ROOK:
             return self.rook_steps()
-        elif self == PieceType.KNIGHT:
+        elif self == PieceTypeEngine.KNIGHT:
             return self.knight_steps()
-        elif self == PieceType.BISHOP:
+        elif self == PieceTypeEngine.BISHOP:
             return self.bishop_steps()
-        elif self == PieceType.PAWN:
+        elif self == PieceTypeEngine.PAWN:
             return self.pawn_steps()
         else:
             # У королей и королев одни и те же шаги, но королевы могут повторить один шаг.
@@ -107,11 +107,11 @@ class PieceTypeEngine(Enum):
         Все остальные фигуры могут делать только один шаг за ход.
         Возвращает разрешенное количество повторений.
         """
-        if self == PieceType.ROOK:
+        if self == PieceTypeEngine.ROOK:
             return 8
-        elif self == PieceType.QUEEN:
+        elif self == PieceTypeEngine.QUEEN:
             return 8
-        elif self == PieceType.BISHOP:
+        elif self == PieceTypeEngine.BISHOP:
             return 8
         else:
             return 1  # Короли, пешки и кони не могут повторить свои ходы.
