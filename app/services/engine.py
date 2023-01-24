@@ -4,8 +4,8 @@ from app.models.piece import GameSessionModel
 from app.models.player_game_session import PlayerGameSessionModel
 from app.models.enumerations.player_status import PlayerStatus
 from app.models.enumerations.piece_type import PieceType
-from chess_classes.piece_type import PieceTypeEngine
-from chess_classes.color import PieceColorEngine
+from app.services.chess_classes.piece_type import PieceTypeEngine
+from app.services.chess_classes.color import PieceColorEngine
 from app.models.enumerations.piece_color import PieceColor
 
 class EngineService:
