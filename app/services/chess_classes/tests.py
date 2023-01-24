@@ -235,7 +235,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('E4', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('E4', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('E4', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     def test_KNIGHT_move(self):
         allowed_moves = ['A3', 'C3']
@@ -258,7 +258,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('G9', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('G9', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('G9', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     def test_BISHOP_move(self):
         # поставим офицера на С5
@@ -272,7 +272,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('C5', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('C5', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('C5', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     def test_ROOK_move(self):
         # поставим ладью на D4
@@ -286,7 +286,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('D4', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('D4', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('D4', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     def test_QUEEN_move(self):
         # поставим королеву на D4
@@ -301,7 +301,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('D4', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('D4', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('D4', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     def test_KING_move(self):
         # поставим короля на D6
@@ -315,7 +315,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('D6', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('D6', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('D6', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     # проверим рокировку
     def test_castling(self):
