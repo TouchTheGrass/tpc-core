@@ -2,7 +2,7 @@ from enum import Enum
 
 from app.services.chess_classes.direction import Direction
 
-class PieceType(Enum):
+class PieceTypeEngine(Enum):
     PAWN=("pawn")
     KNIGHT=("knight")
     BISHOP=("bishop")
