@@ -1,11 +1,12 @@
 from typing import List
 from app.services.chess_classes.Board import Board
-from app.models.piece import PieceModel
 from app.models.piece import GameSessionModel
 from app.models.player_game_session import PlayerGameSessionModel
 from app.models.enumerations.player_status import PlayerStatus
 from app.models.enumerations.piece_type import PieceType
-
+from chess_classes.piece_type import PieceTypeEngine
+from chess_classes.color import PieceColorEngine
+from app.models.enumerations.piece_color import PieceColor
 
 class EngineService:
 
@@ -17,7 +18,7 @@ class EngineService:
             if obj.id==piece_id:
                 piece_position=obj.position
         # переводим объекты из объектов Piece в формат для работы доски [[piece type, piece colour, position], ... ]
-        pieces_list=board_list_forming(pieces_list)
+        pieces_list=self.board_list_forming(pieces_list)
         # создаем доску для игры
         board = Board(pieces_list)
         possible_moves=board.display_legal_moves_for_engine(piece_position)
@@ -33,10 +34,10 @@ class EngineService:
                 piece_obj=obj
                 # получаем позицию фигуры
                 piece_position = obj.position
-                # получим цвет фигуры
-                piece_color=obj.color
+                # получим цвет фигуры в виде "white"
+                piece_color=obj.color.value
         # переводим объекты из объектов Piece в формат для работы доски [[piece type, piece colour, position], ... ]
-        pieces_list = board_list_forming(pieces_list)
+        pieces_list = self.board_list_forming(pieces_list)
         # создаем доску для игры
         board=Board(pieces_list)
         # делаем ход на созданной доске
@@ -52,12 +53,12 @@ class EngineService:
             piece_obj.position = position
             # получим съеденную объект съеденной фигуры и удалим его
             for obj in pieces_list:
-                if obj.color==res[0].get_colour().value[1] and obj.type==res[0].get_type().value:
+                if obj.color==PieceColor(res[0].get_colour().value[1]) and obj.type==PieceType(res[0].get_type().value):
                     del obj
             # добавление очков за съеденные фигуры
-            self.adding_points(session_id, piece_color, res[0].get_type())
+            self.adding_points(session_id, PieceColor(piece_color), res[0].get_type())
             # если съеден король, поменять статус игры
-            if res[0].get_type()==PieceType.KING:
+            if res[0].get_type()==PieceTypeEngine.KING:
                 # player_info status становится win и lose
                 players_list=games[session_id].players
                 for obj in players_list:
@@ -72,7 +73,7 @@ class EngineService:
                     obj.active=False
                     obj.status = UserStatus("disconnected")
                     # если цвет текущего игрока соответствует цвету UserGameSessionModel
-                    if obj.color==piece_color:
+                    if obj.color==PieceColor(piece_color):
                         obj.is_winner=True
                         obj.scores+=50
                     else:
@@ -84,33 +85,31 @@ class EngineService:
                 game_session_obj=GameSessionModel.objects.filter(id=session_id)
                 game_session_obj.status=SessionStatus("completed")
 
-        # рокировка и повышение пешки еще в процессе
         # рокировка
-        elif len(res)==2:
-            # изменение position для короля
-            king_piece=PieceModel.objects.get(id=piece_id)
-            king_piece.position = position
-            # изменим position для ладьи
-            rook_piece=PieceModel.objects.get(game_session=session, type=res[0].get_type().name, color=res[0].get_colour().name)
-            start_rook_pos=rook_piece.position
-            rook_piece.position=res[1]
-            # записать ход ладьи в историю
-            #self.write_session_motion(rook_piece.id, start_rook_pos, rook_piece.position)
+        elif len(res) == 2:
+            pieces_list = games[session_id].pieces
+            for obj in pieces_list:
+                # изменение position для короля
+                if obj.id == piece_id:
+                    # obj- объект фигуры короля
+                    obj.position = position
+                # изменим position для ладьи
+                elif obj.type == PieceType(res[0].get_type().value) and obj.color == PieceColor(res[0].get_colour().value):
+                    # obj- объект фигуры переставляемой ладьи
+                    # res[1] - позиция ладьи
+                    obj.position = res[1]
+
 
         # повышение пешки
-        elif len(res)==3:
+        elif len(res) == 3:
             # меняем тип фигуры на QUEEN
-            pawn_piece=PieceModel.objects.get(id=piece_id)
-            pawn_piece.type=PieceType.QUEEN
-        # Записать ход в историю
-        #self.write_session_motion(piece_id,start_position, position)
-        # поменять статус игрока данной сессии из текущего цвета на ожидание
-        cur_player=PlayerGameSessionModel.objects.get(session_id=session, color=PieceModel.objects.get(id=piece_id).color)
-        cur_player.status=PlayerStatus.WAIT
-        # поменять статус следующего игрока на совершение хода
-        next_player=PlayerGameSessionModel.objects.get(session_id=session, color=self.get_next_colour(PieceModel.objects.get(id=piece_id).color))
-        next_player.status=PlayerStatus.CURRENT
-        # если ход невозможен, вызываем исключение
+            pieces_list = games[session_id].pieces
+            for obj in pieces_list:
+                if obj.id == piece_id:
+                    # изменение position для пешки
+                    obj.position = position
+                    # меняем тип фигуры на QUEEN
+                    obj.type = PieceType("queen")
 
         
 
@@ -118,11 +117,11 @@ class EngineService:
         user_game_session_list = UserGameSessionModel.objects.filter(game_session_id=session_id, active=True)
         for obj in user_game_session_list:
             if obj.color == cur_color:
-                if eaten_piece_type==PieceType.ROOK or eaten_piece_type==PieceType.BISHOP or eaten_piece_type==PieceType.KNIGHT:
+                if eaten_piece_type==PieceTypeEngine.ROOK or eaten_piece_type==PieceTypeEngine.BISHOP or eaten_piece_type==PieceTypeEngine.KNIGHT:
                     obj.scores+=10
-                elif eaten_piece_type==PieceType.PAWN:
+                elif eaten_piece_type==PieceTypeEngine.PAWN:
                     obj.scores+=1
-                elif eaten_piece_type==PieceType.QUEEN:
+                elif eaten_piece_type==PieceTypeEngine.QUEEN:
                     obj.scores+=25
                     
      
@@ -130,6 +129,6 @@ class EngineService:
     def board_list_forming(list):
         board_list=[]
         for obj in list:
-            board_list.extend([[PieceType(obj.type.value),PieceColor(obj.color.value[1]),obj.position]])
+            board_list.extend([[PieceTypeEngine(obj.type.value), PieceColorEngine(obj.color.value[1]), obj.position]])
         return board_list
 
