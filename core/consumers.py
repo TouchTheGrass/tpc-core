@@ -1,11 +1,11 @@
 from channels.generic.websocket import WebsocketConsumer
 import json
-from utils import get_list_of_available_lobbies
 from channels.exceptions import DenyConnection
 from django.contrib.auth.models import AnonymousUser
 import datetime
 from ..app.services.engine import EngineService
-
+import time
+from threading import Thread
 
 class Interaction_With_The_Lobby(WebsocketConsumer):
     # соединение хранит id соединенного пользователя и id ранее упомянутой game_session
@@ -28,6 +28,10 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
         if user_game_session == True and \
                 GameSessionModel.objects.get(id=session_id).status == SessionStatus("game"):
                     user_game_session.status=UserStatus("disconnected")
+                    # если активная user_game_session имеет статус disconnected более 60 секунд
+                    # таймер запускается в отдельном потоке
+                    game_end = Thread(target=self.game_end_timer)
+                    game_end.start()
 
     # ________________________________________________________________________________
     # Подключенным пользователям требуется предоставлять следующие данные
@@ -42,6 +46,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 'user_game_session': None
             }))
         # у пользователя есть уникальная запись user_game_session -> отправляется информация об активной game_session
+        # обновление должно происходить при изменении статуса игровой сессии
         else:
             game_id=user_game_session.game_session_id
             game_session_obj=GameSessionModel.objects.get(id=game_id)
@@ -50,6 +55,10 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             }))
 
     # Предоставление списка user_gamer_session, ссылающихся на активную game_session
+    # обновление должно происходить при изменении информации о пользователей текущей сессии:
+    # при добавлении/удалении пользователя
+    # при изменении статуса пользователя
+    # при изменении цвета пользователем
     def return_user_gamer_session_list(self, content):
         user_id = content["user_id"]
         user_game_session = UserGameSessionModel.objects.filter(user_id=user_id, active=True)
@@ -71,6 +80,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             }))
 
     # Предоставление списка player_info
+    # обновляется в случае изменения внутриигрового статуса
     def return_player_info_list(self, content):
         user_id = content["user_id"]
         user_game_session = UserGameSessionModel.objects.filter(user_id=user_id)
@@ -97,6 +107,10 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 }))
 
     # Предоставление списка piece
+    # обновляется при изменении данных фигуры:
+    # тип
+    # позиция
+    # цвет
     def retur_piece_list(self, content):
         user_id = content["user_id"]
         user_game_session = UserGameSessionModel.objects.filter(user_id=user_id)
@@ -123,6 +137,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 }))
 
     # Предоставление списка доступных ходов
+    # обновляется после каждого хода
     def available_moves_list(self, content):
         user_id = content["user_id"]
         piece_id=content["piece_id"]
@@ -177,6 +192,11 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             if UserGameSessionModel.objects.filter(user_id=user_id, game_session_id=session_id,active=True).exists() == True:
                 user_game_session=UserGameSessionModel.objects.filter(user_id=user_id, game_session_id=session_id,active=True)
                 user_game_session.status=UserStatus("playing")
+        # обновление при изменении статуса игровой сессии
+        self.return_game_session_info(content)
+        # обновление при добавлении/удалении пользователя
+        self.return_user_gamer_session_list(content)
+
 
     # запрос на создание лобби
     def request_to_create_the_lobby(self, content):
@@ -201,6 +221,9 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 updated_at=datetime.datetime.now()
             )
             user_game_session.save()
+        # обновление при добавлении/удалении пользователя
+        self.return_user_gamer_session_list(content)
+
 
     # смена цвета фигур для текущего пользователя
     def changing_the_piece_color(self, content):
@@ -219,6 +242,8 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                         'COLOR': None
                     }))
             user_game_session.color=color
+        # обновление при изменении цвета пользователем
+        self.return_user_gamer_session_list(content)
 
     # смена статуса о готовности для текущего пользователя
     def changing_the_status_of_readiness(self, content):
@@ -231,6 +256,10 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             user_game_session.status=UserStatus(user_status)
         # проверка и изменение статуса game_session на game
         self.changing_game_status_to_game(session_id)
+        # обновление при изменении статуса игровой сессии
+        self.return_game_session_info(content)
+        # обновление при изменении статуса пользователя
+        self.return_user_gamer_session_list(content)
 
     # запрос на передвижение фигуры
     def request_to_move_the_piece(self, content):
@@ -248,6 +277,12 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                     # параметры связанных piece меняются в соответствии с правилами
                     EngineService.move_piece(session_id,piece_id,position)
                     #параметры player_info меняются в соответствии с правилами
+        # обновляется в случае изменения внутриигрового статуса
+        self.return_player_info_list(content)
+        # обновляется при изменении данных фигуры
+        self.retur_piece_list(content)
+        # обновляется после каждого хода
+        self.available_moves_list(content)
 
 
     # запрос сдаться
@@ -260,6 +295,8 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             # игра заканчивается
             game_session=GameSessionModel.objects.get(id=session_id)
             game_session.status=SessionStatus("completed")
+            # обновление при изменении статуса игровой сессии
+            self.return_game_session_info(content)
             # user_game_session у игроков данной сессии становятся неактивными
             user_game_session=UserGameSessionModel.objects.filter(game_session_id=session_id)
             for obj in user_game_session:
@@ -270,6 +307,8 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 scores=int(obj.scores)
                 score_table=UserScoresModel.objects.get(user_id=user_id)
                 score_table.scores+=scores
+        # обновление при изменении статуса пользователя
+        self.return_user_gamer_session_list(content)
 
     # вспомогательный метод на изменение статуса игры на game с контролем условий:
     # существует 3 user_game_session связанных с game_session
@@ -284,3 +323,28 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                     if obj.status!=UserStatus("ready"):
                         return 0
                 game_session_obj.status=SessionStatus("game")
+
+    def game_end_timer(self, content):
+        user_id = content["user_id"]
+        time.sleep(60)
+        # если активная user_game_session имеет статус disconnected, игра заканчивается
+        user_game_session = UserGameSessionModel.objects.filter(user_id=user_id, active=True)
+        session_id=user_game_session.game_session_id
+        if user_game_session.status==UserStatus("disconnected"):
+            # игра заканчивается
+            game_session = GameSessionModel.objects.get(id=session_id)
+            game_session.status = SessionStatus("completed")
+            # обновление при изменении статуса игровой сессии
+            self.return_game_session_info(content)
+            # user_game_session у игроков данной сессии становятся неактивными
+            user_game_session = UserGameSessionModel.objects.filter(game_session_id=session_id)
+            for obj in user_game_session:
+                obj.active = False
+                obj.status = UserStatus("disconnected")
+                # is_winner = player_info.status ???
+                # начисление очков
+                scores = int(obj.scores)
+                score_table = UserScoresModel.objects.get(user_id=user_id)
+                score_table.scores += scores
+            # обновление при изменении статуса пользователя
+            self.return_user_gamer_session_list(content)
