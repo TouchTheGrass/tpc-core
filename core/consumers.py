@@ -338,24 +338,6 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             # обновляется после каждого хода
             self.available_moves_list(content)
 
-    # запрос на проверку шаха и мата
-    def CheckAndCheckmate(self, content):
-        user_id = content["user_id"]
-        # требуется активная user_game_session у пользователя и
-        # требуется user_game_session.status == game
-        user_game_session=UserGameSessionModel.objects.filter(user_id=user_id, active=True, status=UserStatus("playing"))
-        if user_game_session.exists() == True:
-            # получить id сессии
-            session_id=user_game_session.game_session_id
-            # получить цвет игрока
-            color=user_game_session.color.value
-            # check_and_checkmate_dict - {PieceColor("white"): 1}
-            # 1: ни шах, и не мат; 2: шах; 3: мат
-            check_and_checkmate_dict=EngineService.check_and_checkmate(session_id=session_id, for_color=color)
-            self.send(text_data=json.dumps({
-                'CheckAndCheckmate': check_and_checkmate_dict
-            }))
-
     # запрос сдаться
     def Consider(self, content):
         user_id = content["user_id"]
