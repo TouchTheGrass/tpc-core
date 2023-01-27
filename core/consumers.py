@@ -181,7 +181,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 # у пользователя есть активная user_game_session, у которой status == game
                 available_move_list=EngineService.get_possible_moves(session_id, piece_id)
                 for obj in available_move_list:
-                    PossibleMoveList.append(Position(obj))
+                    PossibleMoveList.append(PossibleMoveItem(value=Position(obj)))
                 self.send(text_data=json.dumps({
                     'PossibleMoveList': PossibleMoveList
                 }))
