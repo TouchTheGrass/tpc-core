@@ -6,6 +6,10 @@ import datetime
 from ..app.services.engine import EngineService
 import time
 from threading import Thread
+from ..app.dto.game_info import GameInfo
+from ..app.models.enumerations.player_status import PlayerStatus
+from ..app.models.enumerations.piece_type import PieceType
+from ..app.models.enumerations.piece_color import PieceColor
 
 class Interaction_With_The_Lobby(WebsocketConsumer):
     # соединение хранит id соединенного пользователя и id ранее упомянутой game_session
@@ -37,7 +41,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
     # Подключенным пользователям требуется предоставлять следующие данные
     #________________________________________________________________________________
     # Предоставление информации об активной game_session
-    def return_game_session_info(self, content):
+    def GameSession(self, content):
         user_id=content["user_id"]
         user_game_session=UserGameSessionModel.objects.filter(user_id=user_id, active=True)
         # у пользователя нет активной записи user_game_session
@@ -59,7 +63,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
     # при добавлении/удалении пользователя
     # при изменении статуса пользователя
     # при изменении цвета пользователем
-    def return_user_gamer_session_list(self, content):
+    def  UserInfoList(self, content):
         user_id = content["user_id"]
         user_game_session = UserGameSessionModel.objects.filter(user_id=user_id, active=True)
         # у пользователя нет активной записи user_game_session
@@ -81,20 +85,20 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
 
     # Предоставление списка player_info
     # обновляется в случае изменения внутриигрового статуса
-    def return_player_info_list(self, content):
+    def PlayerInfoList(self, content):
         user_id = content["user_id"]
         user_game_session = UserGameSessionModel.objects.filter(user_id=user_id)
         # у пользователя нет активной записи user_game_session
         if user_game_session.exists() == False:
             self.send(text_data=json.dumps({
-                'user_game_session': None
+                'PlayerInfoList': None
             }))
         else:
             game_id=user_game_session.game_session_id
             # у пользователя нет активной user_game_session, у которой status == game
             if GameSessionModel.objects.filter(id=game_id, status=SessionStatus("game")).exists()==False:
                 self.send(text_data=json.dumps({
-                    'user_game_session': None
+                    'PlayerInfoList': None
                 }))
             else:
                 # у пользователя есть активная user_game_session, у которой status == game
@@ -111,20 +115,20 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
     # тип
     # позиция
     # цвет
-    def retur_piece_list(self, content):
+    def PieceList(self, content):
         user_id = content["user_id"]
         user_game_session = UserGameSessionModel.objects.filter(user_id=user_id)
         # у пользователя нет активной записи user_game_session
         if user_game_session.exists() == False:
             self.send(text_data=json.dumps({
-                'user_game_session': None
+                'PieceList': None
             }))
         else:
             game_id = user_game_session.game_session_id
             # у пользователя нет активной user_game_session, у которой status == game
             if GameSessionModel.objects.filter(id=game_id, status=SessionStatus("game")).exists() == False:
                 self.send(text_data=json.dumps({
-                    'user_game_session': None
+                    'PieceList': None
                 }))
             else:
                 # у пользователя есть активная user_game_session, у которой status == game
@@ -138,7 +142,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
 
     # Предоставление списка доступных ходов
     # обновляется после каждого хода
-    def available_moves_list(self, content):
+    def PossibleMoveList(self, content):
         user_id = content["user_id"]
         piece_id=content["piece_id"]
         user_game_session = UserGameSessionModel.objects.filter(user_id=user_id)
@@ -146,20 +150,20 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
         # у пользователя нет активной записи user_game_session
         if user_game_session.exists() == False:
             self.send(text_data=json.dumps({
-                'available_move_list': None
+                'PossibleMoveList': None
             }))
         else:
             game_id = user_game_session.game_session_id
             # у пользователя нет активной user_game_session, у которой status == game
             if GameSessionModel.objects.filter(id=game_id, status=SessionStatus("game")).exists() == False:
                 self.send(text_data=json.dumps({
-                    'available_move_list': None
+                    'PossibleMoveList': None
                 }))
             else:
                 # у пользователя есть активная user_game_session, у которой status == game
                 available_move_list=EngineService.get_possible_moves(session_id, piece_id)
                 self.send(text_data=json.dumps({
-                    'available_move_list': available_move_list
+                    'PossibleMoveList': available_move_list
                 }))
 
     # ________________________________________________________________________________
@@ -167,7 +171,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
     # ________________________________________________________________________________
 
     # запрос на присоединение к лобби
-    def request_to_join_the_lobby(self, content):
+    def ConnectLobby(self, content):
         user_id = content["user_id"]
         session_id=content["session_id"]
         if GameSessionModel.objects.get(id=session_id).status==SessionStatus("wait"):
@@ -188,10 +192,18 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                     )
                     user_game_session.save()
 
+            self.send(text_data=json.dumps({
+                'Connection': Connection(game_session_id=session_id)
+            }))
+
         if GameSessionModel.objects.get(id=session_id).status==SessionStatus("game"):
             if UserGameSessionModel.objects.filter(user_id=user_id, game_session_id=session_id,active=True).exists() == True:
                 user_game_session=UserGameSessionModel.objects.filter(user_id=user_id, game_session_id=session_id,active=True)
                 user_game_session.status=UserStatus("playing")
+
+                self.send(text_data=json.dumps({
+                    'Connection': Connection(game_session_id=session_id)
+                }))
         # обновление при изменении статуса игровой сессии
         self.return_game_session_info(content)
         # обновление при добавлении/удалении пользователя
@@ -199,7 +211,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
 
 
     # запрос на создание лобби
-    def request_to_create_the_lobby(self, content):
+    def CreateLobby(self, content):
         user_id = content["user_id"]
         # отсутствие активной game_session у инициализатора
         if UserGameSessionModel.objects.filter(user_id=user_id, active=True).exists() == False:
@@ -208,7 +220,11 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             )
             game_session.save()
             session_id=game_session.id
+            # создание объектов фигур и их расстановка
+            pieces_list=self.piece_generation(session_id)
 
+            GameInfo([PlayerInfo(user_id=user_id, game_session_id=session_id, status=PlayerStatus("wait_turn"))],\
+                     [pieces_list])
             user_game_session = UserGameSessionModel(
                 user_id=user_id,
                 game_session_id=session_id,
@@ -226,8 +242,9 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
 
 
     # смена цвета фигур для текущего пользователя
-    def changing_the_piece_color(self, content):
+    def ChangeColor(self, content):
         user_id = content["user_id"]
+        # color - объект типа PieceColor
         color=content["color"]
         # требуется активная user_gamer_session у пользователя
         user_game_session=UserGameSessionModel.objects.filter(user_id=user_id, active=True)
@@ -239,21 +256,29 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 if obj.color == color:
                     # Такой цвет нельзя выбрать
                     self.send(text_data=json.dumps({
-                        'COLOR': None
+                        'Color': None
                     }))
             user_game_session.color=color
+            self.send(text_data=json.dumps({
+                'Color': Color(value=color)
+            }))
         # обновление при изменении цвета пользователем
         self.return_user_gamer_session_list(content)
 
     # смена статуса о готовности для текущего пользователя
-    def changing_the_status_of_readiness(self, content):
+    def ChangeReadiness(self, content):
         user_id = content["user_id"]
+        # user_status - объект типа ReadyStatus
         user_status=content["status"]
         # требуется активная user_gamer_session у пользователя
         user_game_session = UserGameSessionModel.objects.filter(user_id=user_id, active=True)
         session_id=user_game_session.game_session_id
         if user_game_session.exists() == True:
             user_game_session.status=UserStatus(user_status)
+        self.send(text_data=json.dumps({
+            'ReadyStatus': ReadyStatus(value=user_status)
+        }))
+
         # проверка и изменение статуса game_session на game
         self.changing_game_status_to_game(session_id)
         # обновление при изменении статуса игровой сессии
@@ -262,7 +287,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
         self.return_user_gamer_session_list(content)
 
     # запрос на передвижение фигуры
-    def request_to_move_the_piece(self, content):
+    def MovePiece(self, content):
         user_id = content["user_id"]
         piece_id=content["piece_id"]
         position=content["position"]
@@ -277,16 +302,42 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                     # параметры связанных piece меняются в соответствии с правилами
                     EngineService.move_piece(session_id,piece_id,position)
                     #параметры player_info меняются в соответствии с правилами
-        # обновляется в случае изменения внутриигрового статуса
-        self.return_player_info_list(content)
-        # обновляется при изменении данных фигуры
-        self.retur_piece_list(content)
-        # обновляется после каждого хода
-        self.available_moves_list(content)
+            list_piece_info=games[session_id].pieces
+            for obj in list_piece_info:
+                if obj.id==piece_id:
+                    piece_type=obj.type
 
+            self.send(text_data=json.dumps({
+                'PieceMovement': PieceMovement(id=piece_id, position=position,promotion= piece_type)
+            }))
+
+            # обновляется в случае изменения внутриигрового статуса
+            self.return_player_info_list(content)
+            # обновляется при изменении данных фигуры
+            self.retur_piece_list(content)
+            # обновляется после каждого хода
+            self.available_moves_list(content)
+
+    # запрос на проверку шаха и мата
+    def CheckAndCheckmate(self, content):
+        user_id = content["user_id"]
+        # требуется активная user_game_session у пользователя и
+        # требуется user_game_session.status == game
+        user_game_session=UserGameSessionModel.objects.filter(user_id=user_id, active=True, status=UserStatus("playing"))
+        if user_game_session.exists() == True:
+            # получить id сессии
+            session_id=user_game_session.game_session_id
+            # получить цвет игрока
+            color=user_game_session.color.value
+            # check_and_checkmate_dict - {PieceColor("white"): 1}
+            # 1: ни шах, и не мат; 2: шах; 3: мат
+            check_and_checkmate_dict=EngineService.check_and_checkmate(session_id=session_id, for_color=color)
+            self.send(text_data=json.dumps({
+                'CheckAndCheckmate': check_and_checkmate_dict
+            }))
 
     # запрос сдаться
-    def request_to_surrender(self, content):
+    def Consider(self, content):
         user_id = content["user_id"]
         session_id = content["session_id"]
         # требуется активная user_game_session у пользователя и
@@ -348,3 +399,64 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 score_table.scores += scores
             # обновление при изменении статуса пользователя
             self.return_user_gamer_session_list(content)
+
+    def piece_generation(self, session_id):
+        pieces_list=[]
+        # белый цвет
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("queen"), color=PieceColor("white"), position='I8'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("king"), color=PieceColor("white"), position='D8'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("white"), position='A8'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("white"), position='L8'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("white"), position='J8'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("white"), position='C8'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("white"), position='B8'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("white"), position='K8'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='A7'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='B7'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='C7'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='D7'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='I7'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='J7'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='K7'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='L7'))
+
+        # черный цвет
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("queen"), color=PieceColor("black"), position='E12'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("king"), color=PieceColor("black"), position='I12'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("black"), position='H12'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("black"), position='L12'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("black"), position='F12'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("black"), position='J12'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("black"), position='G12'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("black"), position='K12'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='L11'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='K11'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='J11'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='I11'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='E11'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='F11'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='G11'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='H11'))
+
+        # красный цвет
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("queen"), color=PieceColor("red"), position='D1'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("king"), color=PieceColor("red"), position='E1'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("red"), position='A1'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("red"), position='H1'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("red"), position='C1'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("red"), position='F1'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("red"), position='B1'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("red"), position='G1'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='A2'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='B2'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='C2'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='D2'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='E2'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='F2'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='G2'))
+        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='H2'))
+
+
+
+
+
