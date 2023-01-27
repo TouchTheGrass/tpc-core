@@ -6,10 +6,27 @@ import datetime
 from ..app.services.engine import EngineService
 import time
 from threading import Thread
-from ..app.dto.game_info import GameInfo
+
 from ..app.models.enumerations.player_status import PlayerStatus
 from ..app.models.enumerations.piece_type import PieceType
 from ..app.models.enumerations.piece_color import PieceColor
+from ..app.models.enumerations.user_status import UserStatus
+from ..app.models.enumerations.position import Position
+from ..app.models.enumerations.game_session_status import GameSessionStatus
+from ..app.dto.piece_movement import PieceMovement
+from ..app.dto.game_session import GameSession
+from ..app.dto.ready_status import ReadyStatus
+from ..app.dto.game_info import GameInfo
+from ..app.dto.сolor import Color
+from ..app.dto.connection import Connection
+from ..app.dto.lobby_item import LobbyItem
+from ..app.dto.piece_item import PieceItem
+from ..app.dto.player_info_item import PlayerInfoItem
+from ..app.dto.possible_move_item import PossibleMoveItem
+from ..app.dto.user_info_item import UserInfoItem
+
+
+
 
 class Interaction_With_The_Lobby(WebsocketConsumer):
     # соединение хранит id соединенного пользователя и id ранее упомянутой game_session
@@ -26,11 +43,11 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
 
         # если пользователь имеет активную user_game_session и game_session.status == wait
         if user_game_session==True and\
-            GameSessionModel.objects.get(id=session_id).status == SessionStatus("wait"):
+            GameSessionModel.objects.get(id=session_id).status == GameSessionStatus("wait"):
                 user_game_session.delete()
         # если пользователь имеет активную user_game_session и game_session.status == game
         if user_game_session == True and \
-                GameSessionModel.objects.get(id=session_id).status == SessionStatus("game"):
+                GameSessionModel.objects.get(id=session_id).status == GameSessionStatus("game"):
                     user_game_session.status=UserStatus("disconnected")
                     # если активная user_game_session имеет статус disconnected более 60 секунд
                     # таймер запускается в отдельном потоке
@@ -96,7 +113,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
         else:
             game_id=user_game_session.game_session_id
             # у пользователя нет активной user_game_session, у которой status == game
-            if GameSessionModel.objects.filter(id=game_id, status=SessionStatus("game")).exists()==False:
+            if GameSessionModel.objects.filter(id=game_id, status=GameSessionStatus("game")).exists()==False:
                 self.send(text_data=json.dumps({
                     'PlayerInfoList': None
                 }))
@@ -126,7 +143,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
         else:
             game_id = user_game_session.game_session_id
             # у пользователя нет активной user_game_session, у которой status == game
-            if GameSessionModel.objects.filter(id=game_id, status=SessionStatus("game")).exists() == False:
+            if GameSessionModel.objects.filter(id=game_id, status=GameSessionStatus("game")).exists() == False:
                 self.send(text_data=json.dumps({
                     'PieceList': None
                 }))
@@ -155,15 +172,18 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
         else:
             game_id = user_game_session.game_session_id
             # у пользователя нет активной user_game_session, у которой status == game
-            if GameSessionModel.objects.filter(id=game_id, status=SessionStatus("game")).exists() == False:
+            if GameSessionModel.objects.filter(id=game_id, status=GameSessionStatus("game")).exists() == False:
                 self.send(text_data=json.dumps({
                     'PossibleMoveList': None
                 }))
             else:
+                PossibleMoveList=[]
                 # у пользователя есть активная user_game_session, у которой status == game
                 available_move_list=EngineService.get_possible_moves(session_id, piece_id)
+                for obj in available_move_list:
+                    PossibleMoveList.append(Position(obj))
                 self.send(text_data=json.dumps({
-                    'PossibleMoveList': available_move_list
+                    'PossibleMoveList': PossibleMoveList
                 }))
 
     # ________________________________________________________________________________
@@ -174,7 +194,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
     def ConnectLobby(self, content):
         user_id = content["user_id"]
         session_id=content["session_id"]
-        if GameSessionModel.objects.get(id=session_id).status==SessionStatus("wait"):
+        if GameSessionModel.objects.get(id=session_id).status==GameSessionStatus("wait"):
             # если нет активных game_session у инициализатора и
             # связанных с game_session user_game_session менее 3
             if UserGameSessionModel.objects.filter(user_id=user_id, active=True).exists()==False and\
@@ -196,7 +216,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 'Connection': Connection(game_session_id=session_id)
             }))
 
-        if GameSessionModel.objects.get(id=session_id).status==SessionStatus("game"):
+        if GameSessionModel.objects.get(id=session_id).status==GameSessionStatus("game"):
             if UserGameSessionModel.objects.filter(user_id=user_id, game_session_id=session_id,active=True).exists() == True:
                 user_game_session=UserGameSessionModel.objects.filter(user_id=user_id, game_session_id=session_id,active=True)
                 user_game_session.status=UserStatus("playing")
@@ -216,7 +236,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
         # отсутствие активной game_session у инициализатора
         if UserGameSessionModel.objects.filter(user_id=user_id, active=True).exists() == False:
             game_session=GameSessionModel(
-                status=SessionStatus("wait")
+                status=GameSessionStatus("wait")
             )
             game_session.save()
             session_id=game_session.id
@@ -294,7 +314,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
         user_game_session=UserGameSessionModel.objects.filter(user_id=user_id, active=True)
         session_id = user_game_session.game_session_id
         # если есть активная user_game_session у пользователя и game_session.status == game
-        if user_game_session.exists() == True and GameSessionModel.objects.filter(id=session_id, status=SessionStatus("game")):
+        if user_game_session.exists() == True and GameSessionModel.objects.filter(id=session_id, status=GameSessionStatus("game")):
             # требуется player_info.status == current_turn
             list_player_info=games[session_id].players
             for obj in list_player_info:
@@ -345,7 +365,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
         if UserGameSessionModel.objects.filter(user_id=user_id, active=True, status=UserStatus("playing")).exists() == True:
             # игра заканчивается
             game_session=GameSessionModel.objects.get(id=session_id)
-            game_session.status=SessionStatus("completed")
+            game_session.status=GameSessionStatus("completed")
             # обновление при изменении статуса игровой сессии
             self.return_game_session_info(content)
             # user_game_session у игроков данной сессии становятся неактивными
@@ -368,12 +388,12 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
     def changing_game_status_to_game(self, game_session_id):
         game_session_obj=GameSessionModel.objects.get(id=game_session_id)
         user_game_session_list=UserGameSessionModel.objects.filter(game_session_id=game_session_id)
-        if game_session_obj.status==SessionStatus("wait") and\
+        if game_session_obj.status==GameSessionStatus("wait") and\
             len(user_game_session_list)==3:
                 for obj in user_game_session_list:
                     if obj.status!=UserStatus("ready"):
                         return 0
-                game_session_obj.status=SessionStatus("game")
+                game_session_obj.status=GameSessionStatus("game")
 
     def game_end_timer(self, content):
         user_id = content["user_id"]
@@ -384,7 +404,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
         if user_game_session.status==UserStatus("disconnected"):
             # игра заканчивается
             game_session = GameSessionModel.objects.get(id=session_id)
-            game_session.status = SessionStatus("completed")
+            game_session.status = GameSessionStatus("completed")
             # обновление при изменении статуса игровой сессии
             self.return_game_session_info(content)
             # user_game_session у игроков данной сессии становятся неактивными
