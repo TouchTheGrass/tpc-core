@@ -1,9 +1,9 @@
 import unittest
 
-from app.services.chess_classes.board import Board
-from app.services.chess_classes.color import PieceColorEngine
-from app.services.chess_classes.impossible_position_exception import ImpossiblePositionException
-from app.services.chess_classes.piece_type import PieceTypeEngine
+from Board import Board
+from color import PieceColorEngine
+from impossible_position_exception import ImpossiblePositionException
+from piece_type import PieceTypeEngine
 
 pos_base = [[PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'I8'], [PieceTypeEngine.KING, PieceColorEngine.WHITE, 'D8'],
             [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'A8'], [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'L8'],
@@ -201,6 +201,10 @@ pos_check_ability_to_eat = [[PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'], 
 pos_check_ability_to_eat2 = [[PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'H3'],
                              [PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'D2'], [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'D3']]
 
+pos_check_legal_moves= [[PieceTypeEngine.ROOK, PieceColorEngine.RED, 'E2'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'H3']]
+pos_check_legal_moves_for_check= [[PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'E4'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'H3'],
+                        [PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'], [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'D1']]
+
 cells = ['A8', 'B8', 'C8', 'D8', 'I8', 'J8', 'K8', 'L8', 'A7', 'B7', 'C7', 'D7', 'I7', 'J7', 'K7', 'L7', 'A6',
          'B6', 'C6', 'D6', 'I6', 'J6', 'K6', 'L6', 'A5', 'B5', 'C5', 'D5', 'I5', 'J5', 'K5', 'L5', 'A1',
          'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'A2', 'B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2', 'A3', 'B3',
@@ -250,6 +254,7 @@ class TestChessEngine(unittest.TestCase):
         allowed_moves = ['F3', 'H3', 'E10', 'E4']  #
         eat_moves = ['F11', 'H11']
         for el in cells:
+
             # self.setUp(pos2)
             self.chess_engine = Board(pos_for_test_KNIGHT_move)
             if el not in (allowed_moves + eat_moves):
@@ -348,10 +353,15 @@ class TestChessEngine(unittest.TestCase):
 
     # проверим корректность возвращаемых возможных ходов
     def test_display_legal_moves_for_engine(self):
-        # поставим ладью на D4
-        legal_moves = ['D7', 'D6', 'D5', 'A4', 'B4', 'C4', 'D3', 'E4', 'F4', 'G4', 'H4']
-        self.chess_engine = Board(pos_for_test_ROOK_move)
-        self.assertEqual(self.chess_engine.display_legal_moves_for_engine('D4'), legal_moves)
+        # поставим ладью на E2
+        legal_moves = ['E12', 'E11', 'E9', 'A2', 'B2', 'C2', 'D2', 'E1', 'E3', 'E4', 'F2', 'H2']
+        self.chess_engine = Board(pos_check_legal_moves)
+        self.assertEqual(self.chess_engine.display_legal_moves_for_engine('E2'), legal_moves)
+        # при шахе
+        self.chess_engine = Board(pos_check_legal_moves_for_check)
+        legal_moves =['D2', 'F2']
+        self.assertEqual(self.chess_engine.display_legal_moves_for_engine('E1'), legal_moves)
+        self.assertEqual(self.chess_engine.display_legal_moves_for_engine('D1'), legal_moves)
 
     def test_check_check_and_checkmate(self):
         self.chess_engine = Board(pos_test_check)
@@ -364,3 +374,7 @@ class TestChessEngine(unittest.TestCase):
         self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColorEngine.RED), 1)
         self.chess_engine = Board(pos_check_ability_to_eat2)
         self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColorEngine.RED), 2)
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestChessEngine)
+    unittest.TextTestRunner(verbosity=0).run(suite)
