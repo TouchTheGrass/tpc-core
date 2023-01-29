@@ -9,9 +9,13 @@ from app.services.chess_classes.color import PieceColorEngine
 from app.models.enumerations.piece_color import PieceColor
 from app.models.enumerations.user_status import UserStatus
 from app.models.enumerations.game_session_status import GameSessionStatus
+from games import games
+from app.models.user_game_session import UserGameSessionModel
+from app.models.user_scores import UserScoresModel
 
 class EngineService:
-
+    # данный словарь нужен для корректного создания объектов PieceColorEngine
+    piece_obj_dict={"white":(0,"white"), "red":(2,"red"), "black":(1,"black")}
 
     def get_possible_moves(self,session_id: int, piece_id: int) -> List[str]:
         # получим список фигур игровой сессии
@@ -106,7 +110,7 @@ class EngineService:
         check_and_checkmate_dict={}
         for obj in colors:
             if obj!=for_color:
-                check_and_checkmate_dict[obj]=board.is_check_and_checkmate(PieceColorEngine(obj))
+                check_and_checkmate_dict[obj]=board.is_check_and_checkmate(PieceColorEngine(self.piece_obj_dict.get(obj)))
         # returns: 1: ни шах, и не мат; 2: шах; 3: мат
         # return: {"white": 1}
         return check_and_checkmate_dict
@@ -124,10 +128,11 @@ class EngineService:
                     
      
     # метод для формирования из списка, содержащего объекты Piece в формат для движка [[PieceType, PieceColor, position],..]
-    def board_list_forming(list):
+    def board_list_forming(self,list):
         board_list=[]
         for obj in list:
-            board_list.extend([[PieceTypeEngine(obj.type.value), PieceColorEngine(obj.color.value[1]), obj.position]])
+            board_list.extend([[PieceTypeEngine(obj.type.value), \
+                                PieceColorEngine(self.piece_obj_dict.get(obj.color.value)), obj.position]])
         return board_list
 
     # проверка поставленного мата
@@ -137,7 +142,7 @@ class EngineService:
             # не проверяем мат для текущего цвета
             if obj!=current_color:
                 # поставлен мат
-                if board.is_check_and_checkmate(PieceColorEngine(obj))==2:
+                if board.is_check_and_checkmate(PieceColorEngine(self.piece_obj_dict.get(obj)))==2:
                     # игра завершается
                     return True
 
@@ -166,5 +171,5 @@ class EngineService:
 
         # session status -completed
         game_session_obj = GameSessionModel.objects.filter(id=session_id)
-        game_session_obj.status = GameSessionStatus("completed")
+        game_session_obj[0].status = GameSessionStatus("completed")
 
