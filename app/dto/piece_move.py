@@ -3,7 +3,6 @@ from ..models.enumerations.piece_type import PieceType
 from ..models.enumerations.position import Position
 
 @dataclass
-class PieceMovement:
+class PieceMove:
     id: int
     position:Position
-    promotion:PieceType
