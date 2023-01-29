@@ -12,8 +12,8 @@ ALLOWED_HOSTS = []
 SITE_ID = 1
 
 INSTALLED_APPS = [
-    "app",
 
+    "rest_framework",
     "channels",
     "daphne",
 
@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    "app"
 ]
 
 ASGI_APPLICATION = "core.asgi.application"
@@ -58,7 +59,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-DATABASES = {}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'tpc',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
+}
+
+AUTH_USER_MODEL = "app.User"
 
 AUTH_PASSWORD_VALIDATORS = []
 
@@ -75,3 +87,19 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny'
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer'
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser'
+    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "app.backends.jwt.JWTAuthentication"
+    )
+}
