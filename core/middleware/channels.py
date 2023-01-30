@@ -8,7 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.db import close_old_connections
 from jwt import decode
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from rest_framework_simplejwt.tokens import UntypedToken
+from rest_framework_simplejwt.tokens import UntypedToken, AccessToken
 
 from app.models import User
 from core import settings
@@ -17,7 +17,8 @@ from core import settings
 @database_sync_to_async
 def get_user(token):
     try:
-        return get_user_model().objects.get(id=token["user_id"])
+        access_token = AccessToken(token)
+        return get_user_model().objects.get(access_token["user_id"])
     except User.DoesNotExist:
         return AnonymousUser()
 

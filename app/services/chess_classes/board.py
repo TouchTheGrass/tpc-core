@@ -1,5 +1,5 @@
-from app.models.enumerations.piece_type import PieceType
-from app.models.enumerations.piece_color import PieceColor
+from app.enumerations.piece_type import PieceType
+from app.enumerations.piece_color import PieceColor
 from app.services.chess_classes.direction import Direction
 from app.services.chess_classes.impossible_position_exception import ImpossiblePositionException
 from app.services.chess_classes.piece import Piece

@@ -1,4 +1,6 @@
 import os
+from datetime import timedelta
+
 from django.utils.translation import gettext_lazy as _
 from pathlib import Path
 
@@ -14,8 +16,10 @@ SITE_ID = 1
 INSTALLED_APPS = [
 
     "rest_framework",
+    "rest_framework_simplejwt",
     "channels",
     "daphne",
+    "django_extensions",
 
     "django.contrib.admin",
     "django.contrib.auth",
@@ -60,13 +64,13 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'tpc',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "tpc",
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+        "HOST": "127.0.0.1",
+        "PORT": "5433",
     }
 }
 
@@ -77,8 +81,8 @@ AUTH_PASSWORD_VALIDATORS = []
 USE_I18N = True
 LANGUAGE_CODE = "en"
 LANGUAGES = [
-    ('en', _('English')),
-    ('ru', _('Russian')),
+    ("en", _("English")),
+    ("ru", _("Russian")),
 ]
 
 TIME_ZONE = "UTC"
@@ -89,17 +93,35 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.AllowAny'
-    ),
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer'
-    ),
-    'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser'
-    ),
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "app.backends.jwt.JWTAuthentication"
-    )
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        # "app.backends.jwt.JWTAuthentication"
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
+    ]
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=10),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=20),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=10),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=20),
 }

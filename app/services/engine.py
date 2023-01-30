@@ -1,19 +1,18 @@
 from typing import List
 from app.entities.piece import PieceEntity
-from app.models.enumerations.game_session_status import GameSessionStatus
-from app.models.game_session import GameSessionModel
-from app.models.piece import PieceModel
-from app.models.player_game_session import PlayerGameSessionModel
-from app.models.enumerations.player_status import PlayerStatus
-from app.models.enumerations.piece_type import PieceType
-from app.models.enumerations.piece_color import PieceColor
+from app.enumerations.game_session_status import GameSessionStatus
+from app.models import GameSession, PieceModel
+from app.models import UserGameSession
+from app.enumerations.player_status import PlayerStatus
+from app.enumerations.piece_type import PieceType
+from app.enumerations.piece_color import PieceColor
 from app.services.chess_classes.board import Board
 
 
 class EngineService:
 
     def get_game_session_status(self, session_id: int) -> GameSessionStatus:
-        status = GameSessionModel.objects.get(id=session_id).status
+        status = GameSession.objects.get(id=session_id).status
         return status
 
     def get_pieces(self, session_id: int) -> List[PieceEntity]:
@@ -44,7 +43,7 @@ class EngineService:
         # получим игровую сессию фигуры по id
         session = PieceModel.objects.get(id=piece_id).game_session
         # получим id игрока
-        player = PlayerGameSessionModel.objects.get(session_id=session, color=piece_colour).player_id
+        player = UserGameSession.objects.get(session_id=session, color=piece_colour).player_id
         # получим список положения фигур [[type, colour, position, game_session], ... ] для создания объекта доски
         positions = PieceModel.objects.filter(game_session=session)
         # создаем доску для игры
@@ -69,7 +68,7 @@ class EngineService:
                                       color=res[0].get_color().name).delete()
             # если съеден король, поменять статус игры
             if res[0].get_type() == PieceType.KING:
-                game_status = GameSessionModel.objects.filter(id=session)
+                game_status = GameSession.objects.filter(id=session)
                 game_status.status = GameSessionStatus.COMPLETED
                 # у остальных игроков (проигравших) снять 50 очков
                 # self.subtraction_points(session, piece_colour)
@@ -94,11 +93,11 @@ class EngineService:
         # Записать ход в историю
         # self.write_session_motion(piece_id,start_position, position)
         # поменять статус игрока данной сессии из текущего цвета на ожидание
-        cur_player = PlayerGameSessionModel.objects.get(session_id=session,
+        cur_player = UserGameSession.objects.get(session_id=session,
                                                         color=PieceModel.objects.get(id=piece_id).color)
         cur_player.status = PlayerStatus.WAIT
         # поменять статус следующего игрока на совершение хода
-        next_player = PlayerGameSessionModel.objects.get(session_id=session, color=self.get_next_colour(
+        next_player = UserGameSession.objects.get(session_id=session, color=self.get_next_colour(
             PieceModel.objects.get(id=piece_id).color))
         next_player.status = PlayerStatus.CURRENT
         # если ход невозможен, вызываем исключение

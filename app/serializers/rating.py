@@ -10,7 +10,7 @@ class UserRatingItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "name", "scores"]
+        fields = ["id", "username", "scores"]
 
 
 class UserRatingListSerializer(serializers.Serializer):

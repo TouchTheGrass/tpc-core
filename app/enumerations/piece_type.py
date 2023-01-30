@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from app.services.chess_classes.Direction import Direction
+from app.services.chess_classes.direction import Direction
 
 class PieceType(models.TextChoices):
     KING = _("king")
