@@ -9,3 +9,5 @@ class UserScores(models.Model):
         on_delete=models.CASCADE,
         primary_key=True)
     scores = models.IntegerField()
+    wins = models.IntegerField()
+    loses = models.IntegerField()
