@@ -1,5 +1,5 @@
 from enum import Enum
-from direction import Direction
+from app.services.chess_classes.direction import Direction
 
 class PieceTypeEngine(Enum):
     PAWN=("pawn")
