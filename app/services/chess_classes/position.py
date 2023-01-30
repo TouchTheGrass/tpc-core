@@ -1,5 +1,5 @@
 from enum import Enum
-from color import PieceColorEngine
+from app.services.chess_classes.color import PieceColorEngine
 from impossible_position_exception import ImpossiblePositionException
 
 
