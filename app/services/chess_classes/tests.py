@@ -1,206 +1,209 @@
 import unittest
 
-from app.services.chess_classes.board import Board
-from app.services.chess_classes.color import PieceColor
-from app.services.chess_classes.impossible_position_exception import ImpossiblePositionException
-from app.services.chess_classes.piece_type import PieceType
+from board import Board
+from color import PieceColorEngine
+from impossible_position_exception import ImpossiblePositionException
+from piece_type import PieceTypeEngine
 
-pos_base = [[PieceType.QUEEN, PieceColor.WHITE, 'I8'], [PieceType.KING, PieceColor.WHITE, 'D8'],
-            [PieceType.ROOK, PieceColor.WHITE, 'A8'], [PieceType.ROOK, PieceColor.WHITE, 'L8'],
-            [PieceType.BISHOP, PieceColor.WHITE, 'J8'], [PieceType.BISHOP, PieceColor.WHITE, 'C8'],
-            [PieceType.KNIGHT, PieceColor.WHITE, 'B8'], [PieceType.KNIGHT, PieceColor.WHITE, 'K8'],
-            [PieceType.PAWN, PieceColor.WHITE, 'A7'], [PieceType.PAWN, PieceColor.WHITE, 'B7'],
-            [PieceType.PAWN, PieceColor.WHITE, 'C7'], [PieceType.PAWN, PieceColor.WHITE, 'D7'],
-            [PieceType.PAWN, PieceColor.WHITE, 'I7'], [PieceType.PAWN, PieceColor.WHITE, 'J7'],
-            [PieceType.PAWN, PieceColor.WHITE, 'K7'], [PieceType.PAWN, PieceColor.WHITE, 'L7'],
-            [PieceType.QUEEN, PieceColor.BLACK, 'E12'], [PieceType.KING, PieceColor.BLACK, 'I12'],
-            [PieceType.ROOK, PieceColor.BLACK, 'H12'], [PieceType.ROOK, PieceColor.BLACK, 'L12'],
-            [PieceType.BISHOP, PieceColor.BLACK, 'F12'], [PieceType.BISHOP, PieceColor.BLACK, 'J12'],
-            [PieceType.KNIGHT, PieceColor.BLACK, 'G12'], [PieceType.KNIGHT, PieceColor.BLACK, 'K12'],
-            [PieceType.PAWN, PieceColor.BLACK, 'L11'], [PieceType.PAWN, PieceColor.BLACK, 'K11'],
-            [PieceType.PAWN, PieceColor.BLACK, 'J11'], [PieceType.PAWN, PieceColor.BLACK, 'I11'],
-            [PieceType.PAWN, PieceColor.BLACK, 'E11'], [PieceType.PAWN, PieceColor.BLACK, 'F11'],
-            [PieceType.PAWN, PieceColor.BLACK, 'G11'], [PieceType.PAWN, PieceColor.BLACK, 'H11'],
+pos_base = [[PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'I8'], [PieceTypeEngine.KING, PieceColorEngine.WHITE, 'D8'],
+            [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'A8'], [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'L8'],
+            [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'J8'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'C8'],
+            [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'B8'], [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'K8'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'A7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'B7'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'C7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'D7'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'I7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'J7'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'K7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'L7'],
+            [PieceTypeEngine.QUEEN, PieceColorEngine.BLACK, 'E12'], [PieceTypeEngine.KING, PieceColorEngine.BLACK, 'I12'],
+            [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'H12'], [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'L12'],
+            [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'F12'], [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'J12'],
+            [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'G12'], [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'K12'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'L11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'K11'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'J11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'I11'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'E11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'F11'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'G11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'H11'],
 
-            [PieceType.QUEEN, PieceColor.RED, 'D1'], [PieceType.KING, PieceColor.RED, 'E1'],
-            [PieceType.ROOK, PieceColor.RED, 'A1'], [PieceType.ROOK, PieceColor.RED, 'H1'],
-            [PieceType.BISHOP, PieceColor.RED, 'C1'], [PieceType.BISHOP, PieceColor.RED, 'F1'],
-            [PieceType.KNIGHT, PieceColor.RED, 'B1'], [PieceType.KNIGHT, PieceColor.RED, 'G1'],
-            [PieceType.PAWN, PieceColor.RED, 'A2'], [PieceType.PAWN, PieceColor.RED, 'B2'],
-            [PieceType.PAWN, PieceColor.RED, 'C2'], [PieceType.PAWN, PieceColor.RED, 'D2'],
-            [PieceType.PAWN, PieceColor.RED, 'E2'], [PieceType.PAWN, PieceColor.RED, 'F2'],
-            [PieceType.PAWN, PieceColor.RED, 'G2'], [PieceType.PAWN, PieceColor.RED, 'H2']
+            [PieceTypeEngine.QUEEN, PieceColorEngine.RED, 'D1'], [PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'],
+            [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'A1'], [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'H1'],
+            [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'C1'], [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'F1'],
+            [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'B1'], [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'G1'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'A2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'B2'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'C2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'D2'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'E2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'F2'],
+            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'G2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'H2']
             ]
-pos_for_test_PAWN_move = [[PieceType.QUEEN, PieceColor.WHITE, 'I8'], [PieceType.KING, PieceColor.WHITE, 'D8'],
-                          [PieceType.ROOK, PieceColor.WHITE, 'A8'], [PieceType.ROOK, PieceColor.WHITE, 'L8'],
-                          [PieceType.BISHOP, PieceColor.WHITE, 'J8'], [PieceType.BISHOP, PieceColor.WHITE, 'C8'],
-                          [PieceType.KNIGHT, PieceColor.WHITE, 'B8'], [PieceType.KNIGHT, PieceColor.WHITE, 'K8'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'A7'], [PieceType.PAWN, PieceColor.WHITE, 'B7'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'C7'], [PieceType.PAWN, PieceColor.WHITE, 'D3'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'I7'], [PieceType.PAWN, PieceColor.WHITE, 'J7'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'K7'], [PieceType.PAWN, PieceColor.WHITE, 'L7'],
+pos_for_test_PAWN_move = [[PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'I8'], [PieceTypeEngine.KING, PieceColorEngine.WHITE, 'D8'],
+                          [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'A8'], [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'L8'],
+                          [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'J8'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'C8'],
+                          [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'B8'], [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'K8'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'A7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'B7'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'C7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'D3'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'I7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'J7'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'K7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'L7'],
 
-                          [PieceType.QUEEN, PieceColor.BLACK, 'E12'], [PieceType.KING, PieceColor.BLACK, 'I12'],
-                          [PieceType.ROOK, PieceColor.BLACK, 'H12'], [PieceType.ROOK, PieceColor.BLACK, 'L12'],
-                          [PieceType.BISHOP, PieceColor.BLACK, 'F12'], [PieceType.BISHOP, PieceColor.BLACK, 'J12'],
-                          [PieceType.KNIGHT, PieceColor.BLACK, 'G12'], [PieceType.KNIGHT, PieceColor.BLACK, 'K12'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'L11'], [PieceType.PAWN, PieceColor.BLACK, 'K11'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'J11'], [PieceType.PAWN, PieceColor.BLACK, 'I9'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'E9'], [PieceType.PAWN, PieceColor.BLACK, 'F11'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'G11'], [PieceType.PAWN, PieceColor.BLACK, 'H11'],
+                          [PieceTypeEngine.QUEEN, PieceColorEngine.BLACK, 'E12'], [PieceTypeEngine.KING, PieceColorEngine.BLACK, 'I12'],
+                          [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'H12'], [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'L12'],
+                          [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'F12'], [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'J12'],
+                          [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'G12'], [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'K12'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'L11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'K11'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'J11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'I9'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'E9'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'F11'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'G11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'H11'],
 
-                          [PieceType.QUEEN, PieceColor.RED, 'D1'], [PieceType.KING, PieceColor.RED, 'E1'],
-                          [PieceType.ROOK, PieceColor.RED, 'A1'], [PieceType.ROOK, PieceColor.RED, 'H1'],
-                          [PieceType.BISHOP, PieceColor.RED, 'C1'], [PieceType.BISHOP, PieceColor.RED, 'F1'],
-                          [PieceType.KNIGHT, PieceColor.RED, 'B1'], [PieceType.KNIGHT, PieceColor.RED, 'G1'],
-                          [PieceType.PAWN, PieceColor.RED, 'A2'], [PieceType.PAWN, PieceColor.RED, 'B2'],
-                          [PieceType.PAWN, PieceColor.RED, 'C2'], [PieceType.PAWN, PieceColor.RED, 'D2'],
-                          [PieceType.PAWN, PieceColor.RED, 'E4'], [PieceType.PAWN, PieceColor.RED, 'F2'],
-                          [PieceType.PAWN, PieceColor.RED, 'G2'], [PieceType.PAWN, PieceColor.RED, 'H2']
+                          [PieceTypeEngine.QUEEN, PieceColorEngine.RED, 'D1'], [PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'],
+                          [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'A1'], [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'H1'],
+                          [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'C1'], [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'F1'],
+                          [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'B1'], [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'G1'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'A2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'B2'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'C2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'D2'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'E4'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'F2'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'G2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'H2']
                           ]
-pos_for_test_KNIGHT_move = [[PieceType.QUEEN, PieceColor.WHITE, 'I8'], [PieceType.KING, PieceColor.WHITE, 'D8'],
-                            [PieceType.ROOK, PieceColor.WHITE, 'A8'], [PieceType.ROOK, PieceColor.WHITE, 'L8'],
-                            [PieceType.BISHOP, PieceColor.WHITE, 'J8'], [PieceType.BISHOP, PieceColor.WHITE, 'C8'],
-                            [PieceType.KNIGHT, PieceColor.WHITE, 'B8'], [PieceType.KNIGHT, PieceColor.WHITE, 'K8'],
-                            [PieceType.PAWN, PieceColor.WHITE, 'A7'], [PieceType.PAWN, PieceColor.WHITE, 'B7'],
-                            [PieceType.PAWN, PieceColor.WHITE, 'C7'], [PieceType.PAWN, PieceColor.WHITE, 'D7'],
-                            [PieceType.PAWN, PieceColor.WHITE, 'I7'], [PieceType.PAWN, PieceColor.WHITE, 'J7'],
-                            [PieceType.PAWN, PieceColor.WHITE, 'K7'], [PieceType.PAWN, PieceColor.WHITE, 'L7'],
-                            [PieceType.QUEEN, PieceColor.BLACK, 'E12'], [PieceType.KING, PieceColor.BLACK, 'I12'],
-                            [PieceType.ROOK, PieceColor.BLACK, 'H12'], [PieceType.ROOK, PieceColor.BLACK, 'L12'],
-                            [PieceType.BISHOP, PieceColor.BLACK, 'F12'], [PieceType.BISHOP, PieceColor.BLACK, 'J12'],
-                            [PieceType.KNIGHT, PieceColor.BLACK, 'G12'], [PieceType.KNIGHT, PieceColor.BLACK, 'K12'],
-                            [PieceType.PAWN, PieceColor.BLACK, 'L11'], [PieceType.PAWN, PieceColor.BLACK, 'K11'],
-                            [PieceType.PAWN, PieceColor.BLACK, 'J11'], [PieceType.PAWN, PieceColor.BLACK, 'I11'],
-                            [PieceType.PAWN, PieceColor.BLACK, 'E11'], [PieceType.PAWN, PieceColor.BLACK, 'F11'],
-                            [PieceType.PAWN, PieceColor.BLACK, 'G11'], [PieceType.PAWN, PieceColor.BLACK, 'H11'],
+pos_for_test_KNIGHT_move = [[PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'I8'], [PieceTypeEngine.KING, PieceColorEngine.WHITE, 'D8'],
+                            [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'A8'], [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'L8'],
+                            [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'J8'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'C8'],
+                            [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'B8'], [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'K8'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'A7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'B7'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'C7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'D7'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'I7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'J7'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'K7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'L7'],
+                            [PieceTypeEngine.QUEEN, PieceColorEngine.BLACK, 'E12'], [PieceTypeEngine.KING, PieceColorEngine.BLACK, 'I12'],
+                            [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'H12'], [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'L12'],
+                            [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'F12'], [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'J12'],
+                            [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'G12'], [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'K12'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'L11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'K11'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'J11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'I11'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'E11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'F11'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'G11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'H11'],
 
-                            [PieceType.QUEEN, PieceColor.RED, 'D1'], [PieceType.KING, PieceColor.RED, 'E1'],
-                            [PieceType.ROOK, PieceColor.RED, 'A1'], [PieceType.ROOK, PieceColor.RED, 'H1'],
-                            [PieceType.BISHOP, PieceColor.RED, 'C1'], [PieceType.BISHOP, PieceColor.RED, 'F1'],
-                            [PieceType.KNIGHT, PieceColor.RED, 'B1'], [PieceType.KNIGHT, PieceColor.RED, 'G9'],
-                            [PieceType.PAWN, PieceColor.RED, 'A2'], [PieceType.PAWN, PieceColor.RED, 'B2'],
-                            [PieceType.PAWN, PieceColor.RED, 'C2'], [PieceType.PAWN, PieceColor.RED, 'D2'],
-                            [PieceType.PAWN, PieceColor.RED, 'E2'], [PieceType.PAWN, PieceColor.RED, 'F2'],
-                            [PieceType.PAWN, PieceColor.RED, 'G2'], [PieceType.PAWN, PieceColor.RED, 'H2']
+                            [PieceTypeEngine.QUEEN, PieceColorEngine.RED, 'D1'], [PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'],
+                            [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'A1'], [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'H1'],
+                            [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'C1'], [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'F1'],
+                            [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'B1'], [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'G9'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'A2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'B2'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'C2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'D2'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'E2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'F2'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'G2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'H2']
                             ]
-pos_for_test_BISHOP_move = [[PieceType.QUEEN, PieceColor.WHITE, 'I8'], [PieceType.KING, PieceColor.WHITE, 'D8'],
-                            [PieceType.ROOK, PieceColor.WHITE, 'A8'], [PieceType.ROOK, PieceColor.WHITE, 'L8'],
-                            [PieceType.BISHOP, PieceColor.WHITE, 'J8'], [PieceType.BISHOP, PieceColor.WHITE, 'C8'],
-                            [PieceType.KNIGHT, PieceColor.WHITE, 'B8'], [PieceType.KNIGHT, PieceColor.WHITE, 'K8'],
-                            [PieceType.PAWN, PieceColor.WHITE, 'A7'], [PieceType.PAWN, PieceColor.WHITE, 'B7'],
-                            [PieceType.PAWN, PieceColor.WHITE, 'C7'], [PieceType.PAWN, PieceColor.WHITE, 'D7'],
-                            [PieceType.PAWN, PieceColor.WHITE, 'I7'], [PieceType.PAWN, PieceColor.WHITE, 'J7'],
-                            [PieceType.PAWN, PieceColor.WHITE, 'K7'], [PieceType.PAWN, PieceColor.WHITE, 'L7'],
-                            [PieceType.QUEEN, PieceColor.BLACK, 'E12'], [PieceType.KING, PieceColor.BLACK, 'I12'],
-                            [PieceType.ROOK, PieceColor.BLACK, 'H12'], [PieceType.ROOK, PieceColor.BLACK, 'L12'],
-                            [PieceType.BISHOP, PieceColor.BLACK, 'F12'], [PieceType.BISHOP, PieceColor.BLACK, 'J12'],
-                            [PieceType.KNIGHT, PieceColor.BLACK, 'G12'], [PieceType.KNIGHT, PieceColor.BLACK, 'K12'],
-                            [PieceType.PAWN, PieceColor.BLACK, 'L11'], [PieceType.PAWN, PieceColor.BLACK, 'K11'],
-                            [PieceType.PAWN, PieceColor.BLACK, 'J11'], [PieceType.PAWN, PieceColor.BLACK, 'I11'],
-                            [PieceType.PAWN, PieceColor.BLACK, 'E11'], [PieceType.PAWN, PieceColor.BLACK, 'F11'],
-                            [PieceType.PAWN, PieceColor.BLACK, 'G11'], [PieceType.PAWN, PieceColor.BLACK, 'H11'],
+pos_for_test_BISHOP_move = [[PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'I8'], [PieceTypeEngine.KING, PieceColorEngine.WHITE, 'D8'],
+                            [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'A8'], [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'L8'],
+                            [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'J8'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'C8'],
+                            [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'B8'], [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'K8'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'A7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'B7'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'C7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'D7'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'I7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'J7'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'K7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'L7'],
+                            [PieceTypeEngine.QUEEN, PieceColorEngine.BLACK, 'E12'], [PieceTypeEngine.KING, PieceColorEngine.BLACK, 'I12'],
+                            [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'H12'], [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'L12'],
+                            [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'F12'], [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'J12'],
+                            [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'G12'], [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'K12'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'L11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'K11'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'J11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'I11'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'E11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'F11'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'G11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'H11'],
 
-                            [PieceType.QUEEN, PieceColor.RED, 'D1'], [PieceType.KING, PieceColor.RED, 'E1'],
-                            [PieceType.ROOK, PieceColor.RED, 'A1'], [PieceType.ROOK, PieceColor.RED, 'H1'],
-                            [PieceType.BISHOP, PieceColor.RED, 'C5'], [PieceType.BISHOP, PieceColor.RED, 'F1'],
-                            [PieceType.KNIGHT, PieceColor.RED, 'B1'], [PieceType.KNIGHT, PieceColor.RED, 'G1'],
-                            [PieceType.PAWN, PieceColor.RED, 'A2'], [PieceType.PAWN, PieceColor.RED, 'B2'],
-                            [PieceType.PAWN, PieceColor.RED, 'C2'], [PieceType.PAWN, PieceColor.RED, 'D2'],
-                            [PieceType.PAWN, PieceColor.RED, 'E2'], [PieceType.PAWN, PieceColor.RED, 'F2'],
-                            [PieceType.PAWN, PieceColor.RED, 'G2'], [PieceType.PAWN, PieceColor.RED, 'H2']
+                            [PieceTypeEngine.QUEEN, PieceColorEngine.RED, 'D1'], [PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'],
+                            [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'A1'], [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'H1'],
+                            [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'C5'], [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'F1'],
+                            [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'B1'], [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'G1'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'A2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'B2'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'C2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'D2'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'E2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'F2'],
+                            [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'G2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'H2']
                             ]
-pos_for_test_ROOK_move = [[PieceType.QUEEN, PieceColor.WHITE, 'I8'], [PieceType.KING, PieceColor.WHITE, 'D8'],
-                          [PieceType.ROOK, PieceColor.WHITE, 'A8'], [PieceType.ROOK, PieceColor.WHITE, 'L8'],
-                          [PieceType.BISHOP, PieceColor.WHITE, 'J8'], [PieceType.BISHOP, PieceColor.WHITE, 'C8'],
-                          [PieceType.KNIGHT, PieceColor.WHITE, 'B8'], [PieceType.KNIGHT, PieceColor.WHITE, 'K8'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'A7'], [PieceType.PAWN, PieceColor.WHITE, 'B7'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'C7'], [PieceType.PAWN, PieceColor.WHITE, 'D7'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'I7'], [PieceType.PAWN, PieceColor.WHITE, 'J7'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'K7'], [PieceType.PAWN, PieceColor.WHITE, 'L7'],
-                          [PieceType.QUEEN, PieceColor.BLACK, 'E12'], [PieceType.KING, PieceColor.BLACK, 'I12'],
-                          [PieceType.ROOK, PieceColor.BLACK, 'H12'], [PieceType.ROOK, PieceColor.BLACK, 'L12'],
-                          [PieceType.BISHOP, PieceColor.BLACK, 'F12'], [PieceType.BISHOP, PieceColor.BLACK, 'J12'],
-                          [PieceType.KNIGHT, PieceColor.BLACK, 'G12'], [PieceType.KNIGHT, PieceColor.BLACK, 'K12'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'L11'], [PieceType.PAWN, PieceColor.BLACK, 'K11'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'J11'], [PieceType.PAWN, PieceColor.BLACK, 'I11'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'E11'], [PieceType.PAWN, PieceColor.BLACK, 'F11'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'G11'], [PieceType.PAWN, PieceColor.BLACK, 'H11'],
+pos_for_test_ROOK_move = [[PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'I8'], [PieceTypeEngine.KING, PieceColorEngine.WHITE, 'D8'],
+                          [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'A8'], [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'L8'],
+                          [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'J8'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'C8'],
+                          [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'B8'], [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'K8'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'A7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'B7'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'C7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'D7'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'I7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'J7'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'K7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'L7'],
+                          [PieceTypeEngine.QUEEN, PieceColorEngine.BLACK, 'E12'], [PieceTypeEngine.KING, PieceColorEngine.BLACK, 'I12'],
+                          [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'H12'], [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'L12'],
+                          [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'F12'], [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'J12'],
+                          [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'G12'], [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'K12'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'L11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'K11'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'J11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'I11'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'E11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'F11'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'G11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'H11'],
 
-                          [PieceType.QUEEN, PieceColor.RED, 'D1'], [PieceType.KING, PieceColor.RED, 'E1'],
-                          [PieceType.ROOK, PieceColor.RED, 'D4'], [PieceType.ROOK, PieceColor.RED, 'H1'],
-                          [PieceType.BISHOP, PieceColor.RED, 'C1'], [PieceType.BISHOP, PieceColor.RED, 'F1'],
-                          [PieceType.KNIGHT, PieceColor.RED, 'B1'], [PieceType.KNIGHT, PieceColor.RED, 'G1'],
-                          [PieceType.PAWN, PieceColor.RED, 'A2'], [PieceType.PAWN, PieceColor.RED, 'B2'],
-                          [PieceType.PAWN, PieceColor.RED, 'C2'], [PieceType.PAWN, PieceColor.RED, 'D2'],
-                          [PieceType.PAWN, PieceColor.RED, 'E2'], [PieceType.PAWN, PieceColor.RED, 'F2'],
-                          [PieceType.PAWN, PieceColor.RED, 'G2'], [PieceType.PAWN, PieceColor.RED, 'H2']
+                          [PieceTypeEngine.QUEEN, PieceColorEngine.RED, 'D1'], [PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'],
+                          [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'D4'], [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'H1'],
+                          [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'C1'], [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'F1'],
+                          [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'B1'], [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'G1'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'A2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'B2'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'C2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'D2'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'E2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'F2'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'G2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'H2']
                           ]
-pos_for_test_QUEEN_move = [[PieceType.QUEEN, PieceColor.WHITE, 'I8'], [PieceType.KING, PieceColor.WHITE, 'D8'],
-                           [PieceType.ROOK, PieceColor.WHITE, 'A8'], [PieceType.ROOK, PieceColor.WHITE, 'L8'],
-                           [PieceType.BISHOP, PieceColor.WHITE, 'J8'], [PieceType.BISHOP, PieceColor.WHITE, 'C8'],
-                           [PieceType.KNIGHT, PieceColor.WHITE, 'B8'], [PieceType.KNIGHT, PieceColor.WHITE, 'K8'],
-                           [PieceType.PAWN, PieceColor.WHITE, 'A7'], [PieceType.PAWN, PieceColor.WHITE, 'B7'],
-                           [PieceType.PAWN, PieceColor.WHITE, 'C7'], [PieceType.PAWN, PieceColor.WHITE, 'D7'],
-                           [PieceType.PAWN, PieceColor.WHITE, 'I7'], [PieceType.PAWN, PieceColor.WHITE, 'J7'],
-                           [PieceType.PAWN, PieceColor.WHITE, 'K7'], [PieceType.PAWN, PieceColor.WHITE, 'L7'],
-                           [PieceType.QUEEN, PieceColor.BLACK, 'E12'], [PieceType.KING, PieceColor.BLACK, 'I12'],
-                           [PieceType.ROOK, PieceColor.BLACK, 'H12'], [PieceType.ROOK, PieceColor.BLACK, 'L12'],
-                           [PieceType.BISHOP, PieceColor.BLACK, 'F12'], [PieceType.BISHOP, PieceColor.BLACK, 'J12'],
-                           [PieceType.KNIGHT, PieceColor.BLACK, 'G12'], [PieceType.KNIGHT, PieceColor.BLACK, 'K12'],
-                           [PieceType.PAWN, PieceColor.BLACK, 'L11'], [PieceType.PAWN, PieceColor.BLACK, 'K11'],
-                           [PieceType.PAWN, PieceColor.BLACK, 'J11'], [PieceType.PAWN, PieceColor.BLACK, 'I11'],
-                           [PieceType.PAWN, PieceColor.BLACK, 'E11'], [PieceType.PAWN, PieceColor.BLACK, 'F11'],
-                           [PieceType.PAWN, PieceColor.BLACK, 'G11'], [PieceType.PAWN, PieceColor.BLACK, 'H11'],
+pos_for_test_QUEEN_move = [[PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'I8'], [PieceTypeEngine.KING, PieceColorEngine.WHITE, 'D8'],
+                           [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'A8'], [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'L8'],
+                           [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'J8'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'C8'],
+                           [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'B8'], [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'K8'],
+                           [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'A7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'B7'],
+                           [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'C7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'D7'],
+                           [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'I7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'J7'],
+                           [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'K7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'L7'],
+                           [PieceTypeEngine.QUEEN, PieceColorEngine.BLACK, 'E12'], [PieceTypeEngine.KING, PieceColorEngine.BLACK, 'I12'],
+                           [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'H12'], [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'L12'],
+                           [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'F12'], [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'J12'],
+                           [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'G12'], [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'K12'],
+                           [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'L11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'K11'],
+                           [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'J11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'I11'],
+                           [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'E11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'F11'],
+                           [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'G11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'H11'],
 
-                           [PieceType.QUEEN, PieceColor.RED, 'D4'], [PieceType.KING, PieceColor.RED, 'E1'],
-                           [PieceType.ROOK, PieceColor.RED, 'A1'], [PieceType.ROOK, PieceColor.RED, 'H1'],
-                           [PieceType.BISHOP, PieceColor.RED, 'C1'], [PieceType.BISHOP, PieceColor.RED, 'F1'],
-                           [PieceType.KNIGHT, PieceColor.RED, 'B1'], [PieceType.KNIGHT, PieceColor.RED, 'G1'],
-                           [PieceType.PAWN, PieceColor.RED, 'A2'], [PieceType.PAWN, PieceColor.RED, 'B2'],
-                           [PieceType.PAWN, PieceColor.RED, 'C2'], [PieceType.PAWN, PieceColor.RED, 'D2'],
-                           [PieceType.PAWN, PieceColor.RED, 'E2'], [PieceType.PAWN, PieceColor.RED, 'F2'],
-                           [PieceType.PAWN, PieceColor.RED, 'G2'], [PieceType.PAWN, PieceColor.RED, 'H2']
+                           [PieceTypeEngine.QUEEN, PieceColorEngine.RED, 'D4'], [PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'],
+                           [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'A1'], [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'H1'],
+                           [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'C1'], [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'F1'],
+                           [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'B1'], [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'G1'],
+                           [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'A2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'B2'],
+                           [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'C2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'D2'],
+                           [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'E2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'F2'],
                            ]
-pos_for_test_KING_move = [[PieceType.QUEEN, PieceColor.WHITE, 'I8'], [PieceType.KING, PieceColor.WHITE, 'D6'],
-                          [PieceType.ROOK, PieceColor.WHITE, 'A8'], [PieceType.ROOK, PieceColor.WHITE, 'L8'],
-                          [PieceType.BISHOP, PieceColor.WHITE, 'J8'], [PieceType.BISHOP, PieceColor.WHITE, 'C8'],
-                          [PieceType.KNIGHT, PieceColor.WHITE, 'B8'], [PieceType.KNIGHT, PieceColor.WHITE, 'K8'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'A7'], [PieceType.PAWN, PieceColor.WHITE, 'B7'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'C7'], [PieceType.PAWN, PieceColor.WHITE, 'D7'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'I7'], [PieceType.PAWN, PieceColor.WHITE, 'J7'],
-                          [PieceType.PAWN, PieceColor.WHITE, 'K7'], [PieceType.PAWN, PieceColor.WHITE, 'L7'],
-                          [PieceType.QUEEN, PieceColor.BLACK, 'E12'], [PieceType.KING, PieceColor.BLACK, 'I12'],
-                          [PieceType.ROOK, PieceColor.BLACK, 'H12'], [PieceType.ROOK, PieceColor.BLACK, 'L12'],
-                          [PieceType.BISHOP, PieceColor.BLACK, 'F12'], [PieceType.BISHOP, PieceColor.BLACK, 'J12'],
-                          [PieceType.KNIGHT, PieceColor.BLACK, 'G12'], [PieceType.KNIGHT, PieceColor.BLACK, 'K12'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'L11'], [PieceType.PAWN, PieceColor.BLACK, 'K11'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'J11'], [PieceType.PAWN, PieceColor.BLACK, 'I11'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'E11'], [PieceType.PAWN, PieceColor.BLACK, 'F11'],
-                          [PieceType.PAWN, PieceColor.BLACK, 'G11'], [PieceType.PAWN, PieceColor.BLACK, 'H11'],
+pos_for_test_KING_move = [[PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'I8'], [PieceTypeEngine.KING, PieceColorEngine.WHITE, 'D6'],
+                          [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'A8'], [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'L8'],
+                          [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'J8'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'C8'],
+                          [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'B8'], [PieceTypeEngine.KNIGHT, PieceColorEngine.WHITE, 'K8'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'A7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'B7'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'C7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'D7'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'I7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'J7'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'K7'], [PieceTypeEngine.PAWN, PieceColorEngine.WHITE, 'L7'],
+                          [PieceTypeEngine.QUEEN, PieceColorEngine.BLACK, 'E12'], [PieceTypeEngine.KING, PieceColorEngine.BLACK, 'I12'],
+                          [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'H12'], [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'L12'],
+                          [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'F12'], [PieceTypeEngine.BISHOP, PieceColorEngine.BLACK, 'J12'],
+                          [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'G12'], [PieceTypeEngine.KNIGHT, PieceColorEngine.BLACK, 'K12'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'L11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'K11'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'J11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'I11'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'E11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'F11'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'G11'], [PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'H11'],
 
-                          [PieceType.QUEEN, PieceColor.RED, 'D1'], [PieceType.KING, PieceColor.RED, 'D6'],
-                          [PieceType.ROOK, PieceColor.RED, 'A1'], [PieceType.ROOK, PieceColor.RED, 'H1'],
-                          [PieceType.BISHOP, PieceColor.RED, 'C1'], [PieceType.BISHOP, PieceColor.RED, 'F1'],
-                          [PieceType.KNIGHT, PieceColor.RED, 'B1'], [PieceType.KNIGHT, PieceColor.RED, 'G1'],
-                          [PieceType.PAWN, PieceColor.RED, 'A2'], [PieceType.PAWN, PieceColor.RED, 'B2'],
-                          [PieceType.PAWN, PieceColor.RED, 'C2'], [PieceType.PAWN, PieceColor.RED, 'D2'],
-                          [PieceType.PAWN, PieceColor.RED, 'E2'], [PieceType.PAWN, PieceColor.RED, 'F2'],
-                          [PieceType.PAWN, PieceColor.RED, 'G2'], [PieceType.PAWN, PieceColor.RED, 'H2']
+                          [PieceTypeEngine.QUEEN, PieceColorEngine.RED, 'D1'], [PieceTypeEngine.KING, PieceColorEngine.RED, 'D6'],
+                          [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'A1'], [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'H1'],
+                          [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'C1'], [PieceTypeEngine.BISHOP, PieceColorEngine.RED, 'F1'],
+                          [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'B1'], [PieceTypeEngine.KNIGHT, PieceColorEngine.RED, 'G1'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'A2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'B2'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'C2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'D2'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'E2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'F2'],
+                          [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'G2'], [PieceTypeEngine.PAWN, PieceColorEngine.RED, 'H2']
                           ]
 pos_for_test_castling = [
-    [PieceType.KING, PieceColor.RED, 'E1'],
-    [PieceType.ROOK, PieceColor.RED, 'A1'], [PieceType.ROOK, PieceColor.RED, 'H1'],
+    [PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'],
+    [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'A1'], [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'H1'],
 ]
-pos_test_upgrade_pawn = [[PieceType.PAWN, PieceColor.BLACK, 'F2']]
-pos_test_check = [[PieceType.KING, PieceColor.RED, 'E1'], [PieceType.BISHOP, PieceColor.WHITE, 'G3']]
-pos_check_and_checkmate = [[PieceType.KING, PieceColor.RED, 'E1'], [PieceType.BISHOP, PieceColor.WHITE, 'H3'],
-                           [PieceType.QUEEN, PieceColor.WHITE, 'C2'], [PieceType.ROOK, PieceColor.WHITE, 'E4']]
-pos_check_ability_to_eat = [[PieceType.KING, PieceColor.RED, 'E1'], [PieceType.BISHOP, PieceColor.WHITE, 'H3'],
-                            [PieceType.QUEEN, PieceColor.WHITE, 'D2'], [PieceType.ROOK, PieceColor.WHITE, 'E4']]
+pos_test_upgrade_pawn = [[PieceTypeEngine.PAWN, PieceColorEngine.BLACK, 'F2']]
+pos_test_check = [[PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'G3']]
+pos_check_and_checkmate = [[PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'H3'],
+                           [PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'C2'], [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'E4']]
+pos_check_ability_to_eat = [[PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'H3'],
+                            [PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'D2'], [PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'E4']]
 # дамку прикрывает ладья
-pos_check_ability_to_eat2 = [[PieceType.KING, PieceColor.RED, 'E1'], [PieceType.BISHOP, PieceColor.WHITE, 'H3'],
-                             [PieceType.QUEEN, PieceColor.WHITE, 'D2'], [PieceType.ROOK, PieceColor.BLACK, 'D3']]
+pos_check_ability_to_eat2 = [[PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'H3'],
+                             [PieceTypeEngine.QUEEN, PieceColorEngine.WHITE, 'D2'], [PieceTypeEngine.ROOK, PieceColorEngine.BLACK, 'D3']]
+
+pos_check_legal_moves= [[PieceTypeEngine.ROOK, PieceColorEngine.RED, 'E2'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'H3']]
+pos_check_legal_moves_for_check= [[PieceTypeEngine.ROOK, PieceColorEngine.WHITE, 'E4'], [PieceTypeEngine.BISHOP, PieceColorEngine.WHITE, 'H3'],
+                        [PieceTypeEngine.KING, PieceColorEngine.RED, 'E1'], [PieceTypeEngine.ROOK, PieceColorEngine.RED, 'D1']]
 
 cells = ['A8', 'B8', 'C8', 'D8', 'I8', 'J8', 'K8', 'L8', 'A7', 'B7', 'C7', 'D7', 'I7', 'J7', 'K7', 'L7', 'A6',
          'B6', 'C6', 'D6', 'I6', 'J6', 'K6', 'L6', 'A5', 'B5', 'C5', 'D5', 'I5', 'J5', 'K5', 'L5', 'A1',
@@ -236,7 +239,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('E4', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('E4', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('E4', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     def test_KNIGHT_move(self):
         allowed_moves = ['A3', 'C3']
@@ -251,6 +254,7 @@ class TestChessEngine(unittest.TestCase):
         allowed_moves = ['F3', 'H3', 'E10', 'E4']  #
         eat_moves = ['F11', 'H11']
         for el in cells:
+
             # self.setUp(pos2)
             self.chess_engine = Board(pos_for_test_KNIGHT_move)
             if el not in (allowed_moves + eat_moves):
@@ -259,7 +263,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('G9', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('G9', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('G9', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     def test_BISHOP_move(self):
         # поставим офицера на С5
@@ -273,7 +277,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('C5', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('C5', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('C5', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     def test_ROOK_move(self):
         # поставим ладью на D4
@@ -287,7 +291,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('D4', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('D4', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('D4', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     def test_QUEEN_move(self):
         # поставим королеву на D4
@@ -302,7 +306,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('D4', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('D4', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('D4', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     def test_KING_move(self):
         # поставим короля на D6
@@ -316,7 +320,7 @@ class TestChessEngine(unittest.TestCase):
             elif el in allowed_moves:
                 self.assertEqual(self.chess_engine.make_move('D6', el), [])
             elif el in eat_moves:
-                self.assertEqual([self.chess_engine.make_move('D6', el)[0].get_type()], [PieceType.PAWN])
+                self.assertEqual([self.chess_engine.make_move('D6', el)[0].get_type()], [PieceTypeEngine.PAWN])
 
     # проверим рокировку
     def test_castling(self):
@@ -338,7 +342,7 @@ class TestChessEngine(unittest.TestCase):
             [
                 self.chess_engine.board[coord],
                 self.chess_engine.board[coord].get_type(),
-                PieceColor.BLACK.name
+                PieceColorEngine.BLACK.name
             ]
         )
 
@@ -349,19 +353,28 @@ class TestChessEngine(unittest.TestCase):
 
     # проверим корректность возвращаемых возможных ходов
     def test_display_legal_moves_for_engine(self):
-        # поставим ладью на D4
-        legal_moves = ['D7', 'D6', 'D5', 'A4', 'B4', 'C4', 'D3', 'E4', 'F4', 'G4', 'H4']
-        self.chess_engine = Board(pos_for_test_ROOK_move)
-        self.assertEqual(self.chess_engine.display_legal_moves_for_engine('D4'), legal_moves)
+        # поставим ладью на E2
+        legal_moves = ['E12', 'E11', 'E9', 'A2', 'B2', 'C2', 'D2', 'E1', 'E3', 'E4', 'F2', 'H2']
+        self.chess_engine = Board(pos_check_legal_moves)
+        self.assertEqual(self.chess_engine.display_legal_moves_for_engine('E2'), legal_moves)
+        # при шахе
+        self.chess_engine = Board(pos_check_legal_moves_for_check)
+        legal_moves =['D2', 'F2']
+        self.assertEqual(self.chess_engine.display_legal_moves_for_engine('E1'), legal_moves)
+        self.assertEqual(self.chess_engine.display_legal_moves_for_engine('D1'), legal_moves)
 
     def test_check_check_and_checkmate(self):
         self.chess_engine = Board(pos_test_check)
-        self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColor.RED), 1)
+        self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColorEngine.RED), 1)
         self.chess_engine.make_move('E1', 'E2')
-        self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColor.RED), 0)
+        self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColorEngine.RED), 0)
         self.chess_engine = Board(pos_check_and_checkmate)
-        self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColor.RED), 2)
+        self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColorEngine.RED), 2)
         self.chess_engine = Board(pos_check_ability_to_eat)
-        self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColor.RED), 1)
+        self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColorEngine.RED), 1)
         self.chess_engine = Board(pos_check_ability_to_eat2)
-        self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColor.RED), 2)
+        self.assertEqual(self.chess_engine.is_check_and_checkmate(PieceColorEngine.RED), 2)
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestChessEngine)
+    unittest.TextTestRunner(verbosity=0).run(suite)
