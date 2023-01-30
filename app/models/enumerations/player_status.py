@@ -3,10 +3,9 @@ from django.utils.translation import gettext_lazy as _
 
 
 class PlayerStatus(models.TextChoices):
-    CONNECTING = _("connecting")
-    CONNECTED = _("connected")
-    WAIT = _("wait")
-    CURRENT = _("current")
-    ELIMINATED = _("eliminated")
+    NOT_READY = _("not_ready")
+    READY = _("ready")
+    PLAYING = _("playing")
+    DONE = _("done")
     DISCONNECTED = _("disconnected")
 
