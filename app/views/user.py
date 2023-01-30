@@ -1,10 +1,9 @@
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from app.serializers.user import UserInfoSerializer, UserHistoryListSerializer, UserHistoryItemSerializer
+from app.serializers.user import UserInfoSerializer, UserHistoryItemSerializer
 
 
 class UserInfoView(ModelViewSet):
@@ -27,13 +26,3 @@ class UserHistoryView(ModelViewSet):
         user = request.user
         serializer = self.get_serializer(user.user_game_sessions, many=True)
         return Response(serializer.data)
-
-
-# class UserHistoryView(APIView):
-#     permission_classes = (IsAuthenticated,)
-#
-#     def get(self, request):
-#         user = request.user
-#         serializer = UserHistoryListSerializer(data=user)
-#         serializer.is_valid()
-#         return Response(serializer.data)

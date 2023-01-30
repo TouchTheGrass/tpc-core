@@ -4,9 +4,7 @@ from app.models import User, UserGameSession
 
 
 class UserInfoSerializer(serializers.ModelSerializer):
-    scores = serializers.SlugRelatedField(
-        slug_field="scores",
-        read_only=True)
+    scores = serializers.IntegerField(source='user_scores.scores')
     wins = serializers.SerializerMethodField()
     loses = serializers.SerializerMethodField()
 
@@ -30,12 +28,3 @@ class UserHistoryItemSerializer(serializers.ModelSerializer):
 
     def get_players(self, instance):
         return instance.game_session.users.values_list("username", flat=True)
-
-
-class UserHistoryListSerializer(serializers.Serializer):
-    list = UserHistoryItemSerializer(
-        many=True,
-        read_only=True)
-
-    class Meta:
-        fields = ["list"]

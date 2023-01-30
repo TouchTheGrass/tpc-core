@@ -4,19 +4,8 @@ from app.models import User
 
 
 class UserRatingItemSerializer(serializers.ModelSerializer):
-    scores = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field="scores")
+    scores = serializers.IntegerField(source='user_scores.scores')
 
     class Meta:
         model = User
         fields = ["id", "username", "scores"]
-
-
-class UserRatingListSerializer(serializers.Serializer):
-    list = UserRatingItemSerializer(
-        many=True,
-        read_only=True)
-
-    class Meta:
-        fields = ["list"]

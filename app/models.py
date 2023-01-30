@@ -36,7 +36,7 @@ class UserScores(models.Model):
         User,
         on_delete=models.CASCADE,
         primary_key=True,
-        related_name="scores")
+        related_name="user_scores")
     scores = models.IntegerField()
 
     class Meta:
