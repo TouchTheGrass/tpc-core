@@ -1,5 +1,5 @@
 from enum import Enum
-from app.models.enumerations.piece_color import PieceColor
+from app.enumerations.piece_color import PieceColor
 from app.services.chess_classes.impossible_position_exception import ImpossiblePositionException
 
 

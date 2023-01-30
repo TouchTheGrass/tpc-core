@@ -12,4 +12,5 @@ class RatingView(APIView):
     def get(self):
         users = User.objects.all()
         serializer = UserRatingListSerializer(data=users)
+        serializer.is_valid()
         return Response(serializer.data)

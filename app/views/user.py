@@ -1,14 +1,39 @@
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 
-from app.serializers.user import UserInfoSerializer
+from app.serializers.user import UserInfoSerializer, UserHistoryListSerializer, UserHistoryItemSerializer
 
 
-class UserInfoView(APIView):
+class UserInfoView(ModelViewSet):
     permission_classes = (IsAuthenticated,)
+    serializer_class = UserInfoSerializer
 
-    def get(self, request):
+    @action(detail=True, methods=["get"])
+    def info(self, request):
         user = request.user
-        serializer = UserInfoSerializer(data=user)
+        serializer = self.get_serializer(user)
         return Response(serializer.data)
+
+
+class UserHistoryView(ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserHistoryItemSerializer
+
+    @action(detail=True, methods=["get"])
+    def history(self, request):
+        user = request.user
+        serializer = self.get_serializer(user.user_game_sessions, many=True)
+        return Response(serializer.data)
+
+
+# class UserHistoryView(APIView):
+#     permission_classes = (IsAuthenticated,)
+#
+#     def get(self, request):
+#         user = request.user
+#         serializer = UserHistoryListSerializer(data=user)
+#         serializer.is_valid()
+#         return Response(serializer.data)
