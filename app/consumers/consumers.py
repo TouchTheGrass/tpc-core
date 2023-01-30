@@ -6,7 +6,7 @@ import datetime
 from ..app.services.engine import EngineService
 import time
 from threading import Thread
-
+import uuid
 from ..app.models.enumerations.player_status import PlayerStatus
 from ..app.models.enumerations.piece_type import PieceType
 from ..app.models.enumerations.piece_color import PieceColor
@@ -110,35 +110,44 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
 
         elif comand.get("type")=="connect_lobby":
             session_id=comand.get("session_id")
-            self.connect_lobby(user_id, session_id)
+            content={"user_id":user_id,"session_id":session_id}
+            self.connect_lobby(content)
 
         elif comand.get("type")=="change_color":
             color=comand.get("color")
-            self.change_color(user_id, color)
+            content={"user_id":user_id, "color":color}
+            self.change_color(content)
 
         elif comand.get("type")=="change_readiness":
             user_status=comand.get("status")
-            self.change_readiness(user_id, user_status)
+            contant={"user_id":user_id,"status":user_status}
+            self.change_readiness(contant)
 
         elif comand.get("type")=="move_piece":
-            piece_id=comand.get("piece_id")
             position=comand.get("position")
-            self.move_piece(user_id, piece_id, position)
+            piece_id=comand.get("piece_id")
+            contant={"user_id":user_id, "piece_id":piece_id, "position":position}
+            self.move_piece(contant)
 
         elif comand.get("type")=="game_session":
-            self.return_game_session_info(user_id)
+            contant={"user_id":user_id}
+            self.return_game_session_info(contant)
 
         elif comand.get("type")=="user_info_list":
-            self.return_user_info_list(user_id)
+            contant = {"user_id": user_id}
+            self.return_user_info_list(contant)
 
         elif comand.get("type")=="player_info_list":
-            self.return_player_info_list(user_id)
+            contant = {"user_id": user_id}
+            self.return_player_info_list(contant)
 
         elif comand.get("type")=="piece_list":
-            self.retur_piece_list(user_id)
+            contant = {"user_id": user_id}
+            self.retur_piece_list(contant)
 
         elif comand.get("type")=="possible_moves_list":
-            self.possible_moves_list(user_id)
+            contant = {"user_id": user_id}
+            self.possible_moves_list(contant)
 
 
     # ________________________________________________________________________________
@@ -422,14 +431,16 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
     # запрос на передвижение фигуры
     def move_piece(self, content):
         user_id = content["user_id"]
-        piece_id=content["piece_id"]
         position=content["position"]
+        piece_id=content["piece_id"]
         user_game_session=UserGameSessionModel.objects.filter(user_id=user_id, active=True)
         session_id = user_game_session[0].game_session_id
         # если есть активная user_game_session у пользователя и game_session.status == game
         if user_game_session.exists() == True and GameSessionModel.objects.filter(id=session_id, status=GameSessionStatus("game")).exists()==True:
             # требуется player_info.status == current_turn
             list_player_info=games[session_id].players
+            pieces=games[session_id].pieces
+
             # obj- объект PlayerInfo
             for obj in list_player_info:
                 # находим текущего пользователя
@@ -546,58 +557,58 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
     def piece_generation(self, session_id):
         pieces_list=[]
         # белый цвет
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("queen"), color=PieceColor("white"), position='I8'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("king"), color=PieceColor("white"), position='D8'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("white"), position='A8'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("white"), position='L8'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("white"), position='J8'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("white"), position='C8'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("white"), position='B8'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("white"), position='K8'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='A7'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='B7'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='C7'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='D7'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='I7'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='J7'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='K7'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='L7'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("queen"), color=PieceColor("white"), position='I8'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("king"), color=PieceColor("white"), position='D8'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("rook"), color=PieceColor("white"), position='A8'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("rook"), color=PieceColor("white"), position='L8'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("white"), position='J8'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("white"), position='C8'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("knight"), color=PieceColor("white"), position='B8'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("knight"), color=PieceColor("white"), position='K8'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='A7'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='B7'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='C7'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='D7'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='I7'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='J7'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='K7'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("white"), position='L7'))
 
         # черный цвет
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("queen"), color=PieceColor("black"), position='E12'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("king"), color=PieceColor("black"), position='I12'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("black"), position='H12'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("black"), position='L12'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("black"), position='F12'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("black"), position='J12'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("black"), position='G12'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("black"), position='K12'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='L11'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='K11'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='J11'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='I11'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='E11'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='F11'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='G11'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='H11'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("queen"), color=PieceColor("black"), position='E12'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("king"), color=PieceColor("black"), position='I12'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("rook"), color=PieceColor("black"), position='H12'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("rook"), color=PieceColor("black"), position='L12'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("black"), position='F12'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("black"), position='J12'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("knight"), color=PieceColor("black"), position='G12'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("knight"), color=PieceColor("black"), position='K12'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='L11'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='K11'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='J11'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='I11'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='E11'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='F11'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='G11'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("black"), position='H11'))
 
         # красный цвет
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("queen"), color=PieceColor("red"), position='D1'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("king"), color=PieceColor("red"), position='E1'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("red"), position='A1'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("rook"), color=PieceColor("red"), position='H1'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("red"), position='C1'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("red"), position='F1'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("red"), position='B1'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("knight"), color=PieceColor("red"), position='G1'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='A2'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='B2'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='C2'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='D2'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='E2'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='F2'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='G2'))
-        pieces_list.append(Piece(game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='H2'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("queen"), color=PieceColor("red"), position='D1'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("king"), color=PieceColor("red"), position='E1'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("rook"), color=PieceColor("red"), position='A1'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("rook"), color=PieceColor("red"), position='H1'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("red"), position='C1'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("bishop"), color=PieceColor("red"), position='F1'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("knight"), color=PieceColor("red"), position='B1'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("knight"), color=PieceColor("red"), position='G1'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='A2'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='B2'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='C2'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='D2'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='E2'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='F2'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='G2'))
+        pieces_list.append(Piece(id=int(uuid.uuid4()),game_session_id=session_id, type=PieceType("pawn"), color=PieceColor("red"), position='H2'))
 
 
 
