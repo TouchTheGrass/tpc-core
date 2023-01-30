@@ -171,7 +171,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             game_id=user_game_session[0].game_session_id
             game_session_obj=GameSessionModel.objects.get(id=game_id)
             self.send(text_data=json.dumps({
-                'GameSession':{"id":game_session_obj.id, "status":game_session_obj.status}
+                'GameSession':{"id":game_session_obj.id, "status":game_session_obj.status.value}
             }))
 
     # Предоставление списка user_gamer_session, ссылающихся на активную game_session
@@ -193,7 +193,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             user_info_list=[]
             for obj in user_list:
                 user_name=UserModel.objects.get(id=obj.user_id).name
-                user_info_list.append({"id":obj.id, "name":user_name,"rating":obj.scores, "status":obj.status, "color":obj.color})
+                user_info_list.append({"id":obj.id, "name":user_name,"rating":obj.scores, "status":obj.status.value, "color":obj.color.value})
 
             self.send(text_data=json.dumps({
                 'UserInfoList': user_info_list
@@ -223,7 +223,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 player_list = games[game_id].players
 
                 for obj in player_list:
-                    player_info_list.append({"id":obj.user_id,"status":obj.status})
+                    player_info_list.append({"id":obj.user_id,"status":obj.status.value})
 
                 self.send(text_data=json.dumps({
                     'PlayerInfoList': player_info_list
@@ -256,7 +256,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 piece_list = games[game_id].pieces
 
                 for obj in piece_list:
-                    obj_piece_list.append({"id":obj.id,"type":obj.type,"color":obj.color,"position":obj.position})
+                    obj_piece_list.append({"id":obj.id,"type":obj.type.value,"color":obj.color.value,"position":obj.position.value})
 
 
                 self.send(text_data=json.dumps({
@@ -398,12 +398,12 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             # получаем доступные цвета
             user_gamer_session = UserGameSessionModel.objects.filter(game_session_id=session_id)
             for obj in user_gamer_session:
-                if obj.color == color:
+                if obj.color.value == color:
                     # Такой цвет нельзя выбрать
                     self.send(text_data=json.dumps({
                         'Color': None
                     }))
-            user_game_session[0].color=color
+            user_game_session[0].color=PieceColor(color)
             self.send(text_data=json.dumps({
                 'Color': {"value":color}
             }))
@@ -413,7 +413,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
     # смена статуса о готовности для текущего пользователя
     def change_readiness(self, content):
         user_id = content["user_id"]
-        # user_status - объект типа ReadyStatus
+        # user_status - строка
         user_status=content["status"]
         # требуется активная user_gamer_session у пользователя
         user_game_session = UserGameSessionModel.objects.filter(user_id=user_id, active=True)
