@@ -102,30 +102,33 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
     def receive(self, text_data):
         comand=json.loads(text_data)
         user_id=self.scope["user"]
+        contant={"user-id":user_id}
         if comand.get("type")=='request':
             if comand.get("value")=="create_lobby":
-                self.create_lobby(user_id)
+                self.create_lobby(contant)
             elif comand.get("value")=="consider":
-                self.consider(user_id)
+                self.consider(contant)
+            elif comand.get("value")=="disconnect":
+                self.disconnect(contant)
 
         elif comand.get("type")=="connect_lobby":
-            session_id=comand.get("session_id")
+            session_id=comand.get("game_session_id")
             content={"user_id":user_id,"session_id":session_id}
             self.connect_lobby(content)
 
         elif comand.get("type")=="change_color":
-            color=comand.get("color")
+            color=comand.get("value")
             content={"user_id":user_id, "color":color}
             self.change_color(content)
 
         elif comand.get("type")=="change_readiness":
-            user_status=comand.get("status")
+            user_status=comand.get("value")
             contant={"user_id":user_id,"status":user_status}
             self.change_readiness(contant)
 
         elif comand.get("type")=="move_piece":
             position=comand.get("position")
-            piece_id=comand.get("piece_id")
+            piece_id=comand.get("id")
             contant={"user_id":user_id, "piece_id":piece_id, "position":position}
             self.move_piece(contant)
 
@@ -190,7 +193,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             user_info_list=[]
             for obj in user_list:
                 user_name=UserModel.objects.get(id=obj.user_id).name
-                user_info_list.append(UserInfoItem(id=obj.id, name=user_name, status=obj.status, color=obj.color))
+                user_info_list.append(UserInfoItem(id=obj.id, name=user_name,rating=obj.scores, status=obj.status, color=obj.color))
 
             self.send(text_data=json.dumps({
                 'UserInfoList': UserInfoList(user_info_list)
