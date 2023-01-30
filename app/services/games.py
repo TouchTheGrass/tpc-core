@@ -10,6 +10,7 @@ class GameInfo:
 
 @dataclass
 class Piece:
+    id: int
     game_session_id: int
     type: PieceTypeEngine
     color:PieceColorEngine
