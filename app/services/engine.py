@@ -1,17 +1,17 @@
 from typing import List
-from tpc.app.services.chess_classes.board import Board
-from tpc.app.models import GameSession
-from tpc.app.models import UserGameSession
-from tpc.app.models import UserScores
+from app.services.chess_classes.board import Board
+from app.models import GameSession
+from app.models import UserGameSession
+from app.models import UserScores
 from games import games
 
-from tpc.app.enumerations.player_status import PlayerStatus
-from tpc.app.enumerations.piece_type import PieceType
-from tpc.app.services.chess_classes.piece_type import PieceTypeEngine
-from tpc.app.services.chess_classes.color import PieceColorEngine
-from tpc.app.enumerations.piece_color import PieceColor
-from tpc.app.enumerations.user_status import UserStatus
-from tpc.app.enumerations.game_session_status import GameSessionStatus
+from app.enumerations.player_status import PlayerStatus
+from app.enumerations.piece_type import PieceType
+from app.services.chess_classes.piece_type import PieceTypeEngine
+from app.services.chess_classes.color import PieceColorEngine
+from app.enumerations.piece_color import PieceColor
+from app.enumerations.user_status import UserStatus
+from app.enumerations.game_session_status import GameSessionStatus
 
 
 class EngineService:
