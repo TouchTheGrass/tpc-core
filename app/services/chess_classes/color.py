@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class PieceColor(Enum):
-    WHITE = 0
-    BLACK = 1
-    RED = 2
+class PieceColorEngine(Enum):
+    WHITE=(0,"white")
+    BLACK=(1,"black")
+    RED=(2,"red")
