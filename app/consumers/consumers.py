@@ -171,7 +171,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             game_id=user_game_session[0].game_session_id
             game_session_obj=GameSessionModel.objects.get(id=game_id)
             self.send(text_data=json.dumps({
-                'GameSession':GameSession(id=game_session_obj.id, status=game_session_obj.status)
+                'GameSession':{"id":game_session_obj.id, "status":game_session_obj.status}
             }))
 
     # Предоставление списка user_gamer_session, ссылающихся на активную game_session
@@ -193,10 +193,10 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
             user_info_list=[]
             for obj in user_list:
                 user_name=UserModel.objects.get(id=obj.user_id).name
-                user_info_list.append(UserInfoItem(id=obj.id, name=user_name,rating=obj.scores, status=obj.status, color=obj.color))
+                user_info_list.append({"id":obj.id, "name":user_name,"rating":obj.scores, "status":obj.status, "color":obj.color})
 
             self.send(text_data=json.dumps({
-                'UserInfoList': UserInfoList(user_info_list)
+                'UserInfoList': user_info_list
             }))
 
     # Предоставление списка player_info
@@ -223,10 +223,10 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 player_list = games[game_id].players
 
                 for obj in player_list:
-                    player_info_list.append(PlayerInfoItem(id=obj.user_id,status=obj.status))
+                    player_info_list.append({"id":obj.user_id,"status":obj.status})
 
                 self.send(text_data=json.dumps({
-                    'PlayerInfoList': PlayerInfoList(player_info_list)
+                    'PlayerInfoList': player_info_list
                 }))
 
     # Предоставление списка piece
@@ -256,11 +256,11 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 piece_list = games[game_id].pieces
 
                 for obj in piece_list:
-                    obj_piece_list.append(PieceItem(id=obj.id,type=obj.type,color=obj.color,position=obj.position))
+                    obj_piece_list.append({"id":obj.id,"type":obj.type,"color":obj.color,"position":obj.position})
 
 
                 self.send(text_data=json.dumps({
-                    'PieceList': PieceList(obj_piece_list)
+                    'PieceList': obj_piece_list
                 }))
 
     # Предоставление списка доступных ходов
@@ -299,12 +299,12 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
 
                 for piece_id in our_pieces_id:
                     available_move_list=EngineService.get_possible_moves(session_id, piece_id)
-                    possible_moves_item=PossibleMovesItem(piece_id=piece_id, possible_moves=available_move_list)
+                    possible_moves_item= {"piece_id":piece_id, "possible_moves":available_move_list}
                     possible_moves_list.append(possible_moves_item)
 
 
                 self.send(text_data=json.dumps({
-                    'PossibleMovesList': PossibleMovesList(possible_moves_list)
+                    'PossibleMovesList': possible_moves_list
                 }))
 
     # ________________________________________________________________________________
@@ -334,7 +334,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                     user_game_session.save()
 
             self.send(text_data=json.dumps({
-                'Connection': Connection(game_session_id=session_id)
+                'Connection': {"game_session_id":session_id}
             }))
         # если у подключаемой game_session status == game
         if GameSessionModel.objects.get(id=session_id).status==GameSessionStatus("game"):
@@ -344,7 +344,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                 user_game_session[0].status=UserStatus("playing")
 
                 self.send(text_data=json.dumps({
-                    'Connection': Connection(game_session_id=session_id)
+                    'Connection': {"game_session_id":session_id}
                 }))
         # обновление при изменении статуса игровой сессии
         self.return_game_session_info(user_id)
@@ -405,7 +405,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                     }))
             user_game_session[0].color=color
             self.send(text_data=json.dumps({
-                'Color': Color(value=color)
+                'Color': {"value":color}
             }))
         # обновление при изменении цвета пользователем
         self.return_user_info_list(content)
@@ -421,7 +421,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
         if user_game_session.exists() == True:
             user_game_session[0].status=UserStatus(user_status)
         self.send(text_data=json.dumps({
-            'ReadyStatus': ReadyStatus(value=user_status)
+            'ReadyStatus': {"value":user_status}
         }))
 
         # проверка и изменение статуса game_session на game
@@ -454,7 +454,7 @@ class Interaction_With_The_Lobby(WebsocketConsumer):
                         #параметры player_info меняются в соответствии с правилами
 
             self.send(text_data=json.dumps({
-                'PieceMove': PieceMove(id=piece_id, position=position)
+                'PieceMove': {"id":piece_id, "position":position}
             }))
 
             # обновляется в случае изменения внутриигрового статуса
