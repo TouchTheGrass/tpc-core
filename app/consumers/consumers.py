@@ -33,6 +33,10 @@ class LobbyListWebsocket(WebsocketConsumer):
     def disconnect(self, code):
         pass
 
+    def receive(self, text_data):
+        comand = json.loads(text_data)
+        if comand.get("type") == 'lobby_list':
+            self.lobby_list()
 
     def lobby_list(self):
         # отправка спичка свободных лобби
