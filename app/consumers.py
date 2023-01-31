@@ -324,10 +324,11 @@ class InteractionWithTheLobby(WebsocketConsumer):
         # если у подключаемой game_session status == game
         if GameSession.objects.get(id=session_id).status == GameSessionStatus("game"):
             # требуется наличие активной game_session у инициализатора
-            if UserGameSession.objects.filter(user_id=user_id, game_session_id=session_id,
-                                              active=True).exists() == True:
-                user_game_session = UserGameSession.objects.filter(user_id=user_id, game_session_id=session_id,
-                                                                   active=True)
+            if UserGameSession.objects.filter(user_id=user_id, game_session_id=session_id, active=True).exists():
+                user_game_session = UserGameSession.objects.filter(
+                    user_id=user_id,
+                    game_session_id=session_id,
+                    active=True)
                 user_game_session[0].status = UserStatus("playing")
 
                 self.send(text_data=json.dumps({
@@ -648,4 +649,3 @@ class InteractionWithTheLobby(WebsocketConsumer):
         # черный цвет
 
         # красный цвет
-
