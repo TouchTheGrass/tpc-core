@@ -3,7 +3,6 @@ from app.services.chess_classes.board import Board
 from app.models import GameSession
 from app.models import UserGameSession
 from app.models import UserScores
-from games import games
 
 from app.enumerations.player_status import PlayerStatus
 from app.enumerations.piece_type import PieceType
@@ -12,6 +11,7 @@ from app.services.chess_classes.color import PieceColorEngine
 from app.enumerations.piece_color import PieceColor
 from app.enumerations.user_status import UserStatus
 from app.enumerations.game_session_status import GameSessionStatus
+from app.services.games import games
 
 
 class EngineService:

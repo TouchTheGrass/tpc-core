@@ -1,6 +1,6 @@
 from enum import Enum
 from app.services.chess_classes.color import PieceColorEngine
-from impossible_position_exception import ImpossiblePositionException
+from app.services.chess_classes.impossible_position_exception import ImpossiblePositionException
 
 
 class Position(Enum):

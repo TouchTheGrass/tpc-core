@@ -6,7 +6,6 @@ from app.services.chess_classes.piece import Piece
 from app.services.chess_classes.position import Position
 
 
-
 class Board:
     """
     Основной класс для представления состояния игры.
@@ -105,7 +104,6 @@ class Board:
             Position.BH4: None, Position.BG4: None, Position.BF4: None, Position.BE4: None, Position.BD4: None,
             Position.BC4: None,
             Position.BB4: None, Position.BA4: None}
-
 
         for i in range(len(positions)):
             c = PieceColorEngine(positions[i][1])
@@ -319,15 +317,16 @@ class Board:
             return []
         else:
             raise ImpossiblePositionException("Illegal Move: " + str(start.name) + "-" + str(fin.name))
+
     # pos в виде строки
     def display_legal_moves_for_engine(self, pos):
         """
         Возвращает список возможных ходов в формате координат для лицевой доски
         """
-        king_moves=[]
+        king_moves = []
         inv_coord = {v: k for k, v in self.coords.items()}
         pos = self.coords.get(pos)
-        piece_color=self.board[pos].get_color()
+        piece_color = self.board[pos].get_color()
         # возможные ходы вражеских фигур
         enemy_moves_to_where_from = self.enemy_moves(piece_color)
         enemy_moves = []
@@ -349,8 +348,8 @@ class Board:
         for el in list(Position):
             if el not in enemy_moves:
                 if self.is_legal_move(pos, el):
-                        el = inv_coord.get(el)
-                        legal_moves.append(el)
+                    el = inv_coord.get(el)
+                    legal_moves.append(el)
 
         if len(legal_moves) == 0:
             return None
@@ -477,7 +476,6 @@ class Board:
         else:
             return 0
 
-
     def opportunity_to_escape(self, king_moves, enemy_moves):
         for el in king_moves:
             if self.board[el] is None:
@@ -496,7 +494,6 @@ class Board:
                     enemy_moves.append(i)
         return enemy_moves
 
-
     def make_move(self, start, end):
         """
         Функция перестановки фигуры с помощью введения начальной и конечной координаты строкового формата 'A8'
@@ -505,4 +502,3 @@ class Board:
         end = self.coords.get(end)
         res = self.move(start, end)
         return res
-
